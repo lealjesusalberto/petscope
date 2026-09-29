@@ -49,8 +49,17 @@ export default function App() {
           // If Firestore collection is empty, auto-seed with initial demo pets
           seedInitialPets().catch((err) => console.warn('Could not auto-seed Firestore:', err));
         } else if (firestorePets && firestorePets.length > 0) {
-          setPets(firestorePets);
-          savePets(firestorePets);
+          setPets((prevPets) => {
+            const merged = [...firestorePets];
+            // Keep any locally created pets that might not be in Firestore yet
+            prevPets.forEach((localPet) => {
+              if (!merged.some((cloudPet) => cloudPet.id === localPet.id)) {
+                merged.unshift(localPet);
+              }
+            });
+            savePets(merged);
+            return merged;
+          });
           setCloudSynced(true);
         }
       },
@@ -145,6 +154,7 @@ export default function App() {
     setEditingPet(null);
     setSelectedPet(savedPet);
     setQrModalPet(savedPet);
+    setCurrentView('dashboard');
 
     // Sync to Firestore in background
     try {
@@ -248,6 +258,7 @@ export default function App() {
         {currentView === 'dashboard' && (
           <DashboardView
             pets={pets}
+            currentUser={currentUser}
             onSelectPet={(pet) => {
               setSelectedPet(pet);
               setCurrentView('profile');
@@ -319,6 +330,7 @@ export default function App() {
       {editingPet !== null && (
         <PetFormModal
           initialPet={editingPet || null}
+          currentUser={currentUser}
           onSave={handleSavePet}
           onClose={() => setEditingPet(null)}
         />

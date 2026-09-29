@@ -1,18 +1,63 @@
 import React, { useState } from 'react';
-import { X, Upload, Check, AlertCircle, Sparkles, Heart, Phone, ShieldCheck } from 'lucide-react';
+import { X, Upload, Check, AlertCircle, Sparkles, Heart, Phone, ShieldCheck, ChevronRight, Dog, Cat } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { DOG_BREEDS, CAT_BREEDS } from '../data/breedsData';
+import { DOG_BREEDS, CAT_BREEDS, DOG_BREEDS_CATALOG, CAT_BREEDS_CATALOG } from '../data/breedsData';
+import BreedPickerModal from './BreedPickerModal';
 
 const PRESET_AVATARS = [
-  { label: 'Golden', url: '/assets/puppy-hero.jpg' },
+  { label: 'Husky', url: '/assets/husky.jpg' },
+  { label: 'Bulldog', url: '/assets/bulldog-ingles.jpg' },
   { label: 'Frenchie', url: '/assets/frenchie.jpg' },
+  { label: 'Pastor Alemán', url: '/assets/pastor-aleman.jpg' },
+  { label: 'Golden', url: '/assets/puppy-hero.jpg' },
+  { label: 'Corgi', url: '/assets/corgi-hero.jpg' },
   { label: 'Siamés', url: '/assets/siamese.jpg' },
-  { label: 'Scottish', url: '/assets/cat-hero.jpg' },
-  { label: 'Corgi', url: '/assets/corgi-hero.jpg' }
+  { label: 'Scottish', url: '/assets/cat-hero.jpg' }
 ];
 
-export default function PetFormModal({ initialPet, onSave, onClose }) {
+// Canvas helper to compress any mobile gallery/camera photo to max 500px JPEG (<50KB)
+function compressImageFile(file, maxDimension = 500, quality = 0.8) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxDimension) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          }
+        } else {
+          if (height > maxDimension) {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedDataUrl);
+      };
+      img.onerror = () => resolve(event.target.result);
+    };
+    reader.onerror = () => resolve('/assets/puppy-hero.jpg');
+  });
+}
+
+export default function PetFormModal({ initialPet, currentUser, onSave, onClose }) {
   const isEditing = Boolean(initialPet?.id);
+  const [isBreedPickerOpen, setIsBreedPickerOpen] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
 
   const [formData, setFormData] = useState({
     id: initialPet?.id || `pet-${Date.now()}`,
@@ -30,22 +75,24 @@ export default function PetFormModal({ initialPet, onSave, onClose }) {
     about: initialPet?.about || '',
     medicalNotes: initialPet?.medicalNotes || '',
     reward: initialPet?.reward || '',
+    ownerId: initialPet?.ownerId || currentUser?.uid || null,
+    ownerEmail: initialPet?.ownerEmail || currentUser?.email || '',
     owner: {
-      name: initialPet?.owner?.name || '',
+      name: initialPet?.owner?.name || currentUser?.displayName || '',
       phone: initialPet?.owner?.phone || '',
       phoneFormatted: initialPet?.owner?.phoneFormatted || '',
       altPhone: initialPet?.owner?.altPhone || '',
       address: initialPet?.owner?.address || '',
-      email: initialPet?.owner?.email || ''
+      email: initialPet?.owner?.email || currentUser?.email || ''
     }
   });
 
   const [error, setError] = useState('');
 
-  const currentBreedsList = formData.species === 'dog' ? DOG_BREEDS : CAT_BREEDS;
+  const currentCatalog = formData.species === 'dog' ? DOG_BREEDS_CATALOG : CAT_BREEDS_CATALOG;
   const popularQuickBreeds = formData.species === 'dog'
-    ? ['Mestizo / Criollo', 'Golden Retriever', 'Bulldog Francés', 'Caniche / Poodle', 'Pastor Alemán', 'Corgi']
-    : ['Mestizo / Común', 'Siamés', 'Scottish Fold', 'Persa', 'Maine Coon', 'Bengalí'];
+    ? ['Siberian Husky', 'Bulldog Inglés', 'Bulldog Francés', 'Pastor Alemán', 'Golden Retriever', 'Welsh Corgi']
+    : ['Siamés', 'Scottish Fold', 'Persa', 'Maine Coon', 'Bengalí', 'Mestizo / Común'];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,15 +107,36 @@ export default function PetFormModal({ initialPet, onSave, onClose }) {
     }
   };
 
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setFormData(prev => ({ ...prev, photo: event.target.result }));
-      };
-      reader.readAsDataURL(file);
+      try {
+        setIsCompressing(true);
+        const compressedBase64 = await compressImageFile(file);
+        setFormData(prev => ({ ...prev, photo: compressedBase64 }));
+      } catch (err) {
+        console.error('Error compressing image:', err);
+      } finally {
+        setIsCompressing(false);
+      }
     }
+  };
+
+  const handleSelectBreedFromModal = (breedItem) => {
+    setFormData(prev => {
+      // If photo was default or not a custom uploaded image, adopt the breed's photo!
+      const isDefaultPhoto =
+        prev.photo.startsWith('/assets/') ||
+        prev.photo.includes('unsplash') ||
+        prev.photo === '/assets/puppy-hero.jpg' ||
+        prev.photo === '/assets/cat-hero.jpg';
+
+      return {
+        ...prev,
+        breed: breedItem.name,
+        photo: isDefaultPhoto && breedItem.photo ? breedItem.photo : prev.photo
+      };
+    });
   };
 
   const handleSubmit = (e) => {
@@ -84,9 +152,12 @@ export default function PetFormModal({ initialPet, onSave, onClose }) {
 
     const updatedPet = {
       ...formData,
-      breed: formData.breed || (formData.species === 'dog' ? 'Mestizo / Criollo' : 'Mestizo / Común'),
+      breed: formData.breed || (formData.species === 'dog' ? 'Siberian Husky' : 'Mestizo / Común'),
+      ownerId: formData.ownerId || currentUser?.uid || null,
+      ownerEmail: formData.ownerEmail || currentUser?.email || '',
       owner: {
         ...formData.owner,
+        name: formData.owner.name || currentUser?.displayName || 'Dueño Responsable',
         phoneFormatted: formData.owner.phoneFormatted || formData.owner.phone
       }
     };
@@ -141,19 +212,24 @@ export default function PetFormModal({ initialPet, onSave, onClose }) {
                   src={formData.photo}
                   alt="Vista previa"
                   className="photo-preview-thumbnail"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = formData.species === 'dog' ? '/assets/puppy-hero.jpg' : '/assets/cat-hero.jpg';
+                  }}
                 />
                 <div className="photo-actions-block">
                   <label className="btn-upload-file">
                     <Upload size={14} />
-                    <span>Subir foto desde galería</span>
+                    <span>{isCompressing ? 'Optimizando foto...' : 'Subir foto desde galería'}</span>
                     <input
                       type="file"
                       accept="image/*"
                       onChange={handleFileUpload}
+                      disabled={isCompressing}
                       style={{ display: 'none' }}
                     />
                   </label>
-                  <span className="photo-hint-text">O elige un avatar rápido:</span>
+                  <span className="photo-hint-text">O elige un avatar rápido con foto:</span>
                 </div>
               </div>
 
@@ -182,7 +258,7 @@ export default function PetFormModal({ initialPet, onSave, onClose }) {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Ej. Max, Bruno, Cleo"
+                  placeholder="Ej. Balto, Winston, Cleo"
                   required
                 />
               </div>
@@ -199,7 +275,7 @@ export default function PetFormModal({ initialPet, onSave, onClose }) {
                       ...prev,
                       species: newSpecies,
                       breed: '',
-                      photo: newSpecies === 'cat' ? '/assets/cat-hero.jpg' : '/assets/puppy-hero.jpg'
+                      photo: newSpecies === 'cat' ? '/assets/cat-hero.jpg' : '/assets/husky.jpg'
                     }));
                   }}
                 >
@@ -209,38 +285,81 @@ export default function PetFormModal({ initialPet, onSave, onClose }) {
               </div>
             </div>
 
-            {/* Raza */}
+            {/* Selector de Raza con Modal y Fotos */}
             <div className="form-group">
-              <label className="form-label">
-                Raza ({formData.species === 'dog' ? 'Canina' : 'Felina'})
-              </label>
-              <input
-                className="form-input"
-                name="breed"
-                list="breeds-datalist"
-                value={formData.breed}
-                onChange={handleChange}
-                placeholder={formData.species === 'dog' ? 'Elige o escribe (Ej. Golden, Poodle...)' : 'Elige o escribe (Ej. Siamés, Persa...)'}
-              />
-              <datalist id="breeds-datalist">
-                {currentBreedsList.map((b) => (
-                  <option key={b} value={b} />
-                ))}
-              </datalist>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <label className="form-label" style={{ marginBottom: 0 }}>
+                  Raza ({formData.species === 'dog' ? 'Canina' : 'Felina'}) *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsBreedPickerOpen(true)}
+                  className="btn-open-breed-picker"
+                  id="btn-open-breed-picker"
+                >
+                  <Sparkles size={13} color="#D97706" />
+                  <span>Explorar Razas con Fotos</span>
+                </button>
+              </div>
+
+              {/* Interactive Breed Selection Card */}
+              <div
+                className="breed-select-box"
+                onClick={() => setIsBreedPickerOpen(true)}
+                title="Abrir catálogo visual de razas"
+              >
+                <div className="breed-select-info">
+                  <img
+                    src={formData.photo || (formData.species === 'dog' ? '/assets/husky.jpg' : '/assets/cat-hero.jpg')}
+                    alt="Raza seleccionada"
+                    className="breed-select-thumb"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = formData.species === 'dog' ? '/assets/puppy-hero.jpg' : '/assets/cat-hero.jpg';
+                    }}
+                  />
+                  <div>
+                    <div className="breed-select-title">
+                      {formData.breed || 'Toca aquí para elegir raza con foto...'}
+                    </div>
+                    <div className="breed-select-sub">
+                      {formData.breed
+                        ? 'Toca para cambiar o buscar otra raza'
+                        : 'Husky, Bulldog Inglés, Francés, Pastor Alemán, etc.'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="breed-select-action-badge">
+                  <span>Cambiar</span>
+                  <ChevronRight size={16} />
+                </div>
+              </div>
 
               {/* Sugerencias en chips */}
               <div className="breed-suggestions-row">
                 <span className="suggestions-tag">Sugerencias:</span>
-                {popularQuickBreeds.map((quickB) => (
-                  <button
-                    type="button"
-                    key={quickB}
-                    onClick={() => setFormData(prev => ({ ...prev, breed: quickB }))}
-                    className={`breed-chip ${formData.breed === quickB ? 'active' : ''}`}
-                  >
-                    {quickB}
-                  </button>
-                ))}
+                {popularQuickBreeds.map((quickB) => {
+                  const matched = currentCatalog.find(b => b.name.toLowerCase() === quickB.toLowerCase());
+                  return (
+                    <button
+                      type="button"
+                      key={quickB}
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          breed: quickB,
+                          photo: (prev.photo.startsWith('/assets/') || prev.photo.includes('unsplash')) && matched?.photo
+                            ? matched.photo
+                            : prev.photo
+                        }));
+                      }}
+                      className={`breed-chip ${formData.breed === quickB ? 'active' : ''}`}
+                    >
+                      {quickB}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -403,6 +522,16 @@ export default function PetFormModal({ initialPet, onSave, onClose }) {
           </button>
         </form>
       </div>
+
+      {/* Modal Secundario: Selector Visual de Razas con Fotos */}
+      {isBreedPickerOpen && (
+        <BreedPickerModal
+          species={formData.species}
+          currentBreed={formData.breed}
+          onSelectBreed={handleSelectBreedFromModal}
+          onClose={() => setIsBreedPickerOpen(false)}
+        />
+      )}
     </div>
   );
 }
