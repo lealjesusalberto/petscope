@@ -1,5 +1,5 @@
 import React from 'react';
-import { QrCode, Plus, Sparkles, Home, ShieldCheck, Heart } from 'lucide-react';
+import { QrCode, Plus, Sparkles, Home } from 'lucide-react';
 
 export default function Navbar({ currentView, onNavigate, onOpenScanner, onAddNewPet }) {
   return (
@@ -50,28 +50,17 @@ export default function Navbar({ currentView, onNavigate, onOpenScanner, onAddNe
           </button>
         </nav>
 
-        {/* Action Buttons (Desktop + Mobile) */}
+        {/* Header Action Buttons */}
         <div className="header-actions">
-          {/* Mobile Quick Buttons */}
-          <div className="mobile-header-btns">
-            <button
-              className={`icon-btn ${currentView === 'dashboard' ? 'active' : ''}`}
-              onClick={() => onNavigate('dashboard')}
-              title="Mis Mascotas"
-              aria-label="Mis Mascotas"
-            >
-              <Home size={18} />
-            </button>
-
-            <button
-              className="icon-btn"
-              onClick={onOpenScanner}
-              title="Escanear Placa QR"
-              aria-label="Escanear Placa QR"
-            >
-              <QrCode size={18} />
-            </button>
-          </div>
+          {/* Quick Scanner Icon Button */}
+          <button
+            className="icon-btn header-scanner-btn"
+            onClick={onOpenScanner}
+            title="Escanear Placa QR"
+            aria-label="Escanear Placa QR"
+          >
+            <QrCode size={18} />
+          </button>
 
           {/* Primary Action Button */}
           <button
@@ -79,7 +68,7 @@ export default function Navbar({ currentView, onNavigate, onOpenScanner, onAddNe
             onClick={onAddNewPet}
             title="Crear Nueva Placa QR"
           >
-            <Plus size={16} strokeWidth={3} />
+            <Plus size={18} strokeWidth={2.8} />
             <span className="btn-text">Nueva Placa</span>
           </button>
         </div>

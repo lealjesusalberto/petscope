@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { X, Upload, Check, AlertCircle, Sparkles } from 'lucide-react';
+import { X, Upload, Check, AlertCircle, Sparkles, Heart, Phone, ShieldCheck } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DOG_BREEDS, CAT_BREEDS } from '../data/breedsData';
 
 const PRESET_AVATARS = [
-  { label: 'Golden Retriever', url: '/assets/puppy-hero.jpg' },
-  { label: 'Bulldog Francés', url: '/assets/frenchie.jpg' },
-  { label: 'Gata Siamesa', url: '/assets/siamese.jpg' },
-  { label: 'Scottish Fold', url: '/assets/cat-hero.jpg' },
-  { label: 'Welsh Corgi', url: '/assets/corgi-hero.jpg' }
+  { label: 'Golden', url: '/assets/puppy-hero.jpg' },
+  { label: 'Frenchie', url: '/assets/frenchie.jpg' },
+  { label: 'Siamés', url: '/assets/siamese.jpg' },
+  { label: 'Scottish', url: '/assets/cat-hero.jpg' },
+  { label: 'Corgi', url: '/assets/corgi-hero.jpg' }
 ];
 
 export default function PetFormModal({ initialPet, onSave, onClose }) {
@@ -91,293 +91,243 @@ export default function PetFormModal({ initialPet, onSave, onClose }) {
       }
     };
 
-    confetti({ particleCount: 70, spread: 80, origin: { y: 0.5 } });
+    confetti({ particleCount: 60, spread: 70, origin: { y: 0.5 } });
     onSave(updatedPet);
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: '24px' }}>
+      <div className="modal-content form-modal-dialog" onClick={(e) => e.stopPropagation()}>
         {/* Modal Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+        <div className="modal-header-row">
           <div>
-            <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#1C1917' }}>
+            <h3 className="modal-title">
               {isEditing ? `Editar datos de ${initialPet.name}` : 'Registrar Nueva Mascota'}
             </h3>
-            <p style={{ fontSize: '13px', color: '#78716C' }}>
-              Genera su placa QR con perfil inteligente
+            <p className="modal-sub">
+              Genera su placa QR oficial con perfil inteligente
             </p>
           </div>
 
           <button
             onClick={onClose}
-            style={{
-              background: '#F5F5F4',
-              border: 'none',
-              borderRadius: '50%',
-              width: '34px',
-              height: '34px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              color: '#78716C'
-            }}
+            className="modal-close-btn"
+            aria-label="Cerrar modal"
           >
             <X size={18} />
           </button>
         </div>
 
         {error && (
-          <div style={{
-            background: '#FEE2E2',
-            border: '1px solid #FCA5A5',
-            borderRadius: '12px',
-            padding: '10px 14px',
-            color: '#B91C1C',
-            fontSize: '13px',
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            marginBottom: '16px'
-          }}>
+          <div className="modal-error-banner">
             <AlertCircle size={16} />
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          {/* Photo Selector */}
-          <div className="form-group">
-            <label className="form-label">Foto de la Mascota</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
-              <img
-                src={formData.photo}
-                alt="Vista previa"
-                style={{
-                  width: '68px',
-                  height: '68px',
-                  borderRadius: '18px',
-                  objectFit: 'cover',
-                  border: '2px solid #FFA800'
-                }}
-              />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
-                <label style={{
-                  background: '#FFFFFF',
-                  border: '1.5px solid #F3E8D6',
-                  borderRadius: '12px',
-                  padding: '8px 12px',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  color: '#1C1917',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px'
-                }}>
-                  <Upload size={14} />
-                  <span>Subir foto desde galería</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    style={{ display: 'none' }}
-                  />
-                </label>
-                <div style={{ fontSize: '11px', color: '#A8A29E' }}>O elige una foto recomendada:</div>
+        <form onSubmit={handleSubmit} className="pet-registration-form">
+          {/* SECCIÓN 1: FOTO Y DATOS BÁSICOS */}
+          <div className="form-card-section">
+            <div className="form-section-header">
+              <Sparkles size={16} color="#D97706" />
+              <span>1. Perfil de la Mascota</span>
+            </div>
+
+            {/* Photo Selector */}
+            <div className="form-group photo-uploader-group">
+              <label className="form-label">Foto de Identificación</label>
+              <div className="photo-uploader-row">
+                <img
+                  src={formData.photo}
+                  alt="Vista previa"
+                  className="photo-preview-thumbnail"
+                />
+                <div className="photo-actions-block">
+                  <label className="btn-upload-file">
+                    <Upload size={14} />
+                    <span>Subir foto desde galería</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                  <span className="photo-hint-text">O elige un avatar rápido:</span>
+                </div>
+              </div>
+
+              {/* Avatar Presets */}
+              <div className="avatar-presets-strip">
+                {PRESET_AVATARS.map((av, idx) => (
+                  <button
+                    type="button"
+                    key={idx}
+                    onClick={() => setFormData(prev => ({ ...prev, photo: av.url }))}
+                    className={`avatar-preset-btn ${formData.photo === av.url ? 'active' : ''}`}
+                  >
+                    <img src={av.url} alt={av.label} className="preset-img" />
+                    <span>{av.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Presets */}
-            <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
-              {PRESET_AVATARS.map((av, idx) => (
-                <button
-                  type="button"
-                  key={idx}
-                  onClick={() => setFormData(prev => ({ ...prev, photo: av.url }))}
-                  style={{
-                    flexShrink: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '6px 10px',
-                    borderRadius: '10px',
-                    border: formData.photo === av.url ? '2px solid #FFA800' : '1px solid #E7E5E4',
-                    background: formData.photo === av.url ? '#FFF4DC' : '#FFFFFF',
-                    cursor: 'pointer'
+            {/* Nombre y Especie */}
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Nombre de la Mascota *</label>
+                <input
+                  className="form-input"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Ej. Max, Bruno, Cleo"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Especie</label>
+                <select
+                  className="form-select"
+                  name="species"
+                  value={formData.species}
+                  onChange={(e) => {
+                    const newSpecies = e.target.value;
+                    setFormData(prev => ({
+                      ...prev,
+                      species: newSpecies,
+                      breed: '',
+                      photo: newSpecies === 'cat' ? '/assets/cat-hero.jpg' : '/assets/puppy-hero.jpg'
+                    }));
                   }}
                 >
-                  <img src={av.url} alt={av.label} style={{ width: '22px', height: '22px', borderRadius: '6px', objectFit: 'cover' }} />
-                  <span style={{ fontSize: '11px', fontWeight: 700, color: '#1C1917' }}>{av.label}</span>
-                </button>
-              ))}
+                  <option value="dog">Perro</option>
+                  <option value="cat">Gato</option>
+                </select>
+              </div>
             </div>
-          </div>
 
-          {/* Nombre y Especie */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            {/* Raza */}
             <div className="form-group">
-              <label className="form-label">Nombre *</label>
+              <label className="form-label">
+                Raza ({formData.species === 'dog' ? 'Canina' : 'Felina'})
+              </label>
               <input
                 className="form-input"
-                name="name"
-                value={formData.name}
+                name="breed"
+                list="breeds-datalist"
+                value={formData.breed}
                 onChange={handleChange}
-                placeholder="Ej. Max, Bruno, Cleo"
-                required
+                placeholder={formData.species === 'dog' ? 'Elige o escribe (Ej. Golden, Poodle...)' : 'Elige o escribe (Ej. Siamés, Persa...)'}
               />
+              <datalist id="breeds-datalist">
+                {currentBreedsList.map((b) => (
+                  <option key={b} value={b} />
+                ))}
+              </datalist>
+
+              {/* Sugerencias en chips */}
+              <div className="breed-suggestions-row">
+                <span className="suggestions-tag">Sugerencias:</span>
+                {popularQuickBreeds.map((quickB) => (
+                  <button
+                    type="button"
+                    key={quickB}
+                    onClick={() => setFormData(prev => ({ ...prev, breed: quickB }))}
+                    className={`breed-chip ${formData.breed === quickB ? 'active' : ''}`}
+                  >
+                    {quickB}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Especie</label>
-              <select
-                className="form-select"
-                name="species"
-                value={formData.species}
-                onChange={(e) => {
-                  const newSpecies = e.target.value;
-                  setFormData(prev => ({
-                    ...prev,
-                    species: newSpecies,
-                    breed: '',
-                    photo: newSpecies === 'cat' ? '/assets/cat-hero.jpg' : '/assets/puppy-hero.jpg'
-                  }));
-                }}
-              >
-                <option value="dog">Perro</option>
-                <option value="cat">Gato</option>
-              </select>
-            </div>
-          </div>
+            {/* Edad y Sexo */}
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Edad</label>
+                <input
+                  className="form-input"
+                  name="age"
+                  value={formData.age}
+                  onChange={handleChange}
+                  placeholder="Ej. 2 años / 8 meses"
+                />
+              </div>
 
-          {/* Raza con Autocompletado Extenso y Datalist */}
-          <div className="form-group">
-            <label className="form-label">
-              Raza ({formData.species === 'dog' ? 'Canina' : 'Felina'}) - Elige o escribe
-            </label>
-            <input
-              className="form-input"
-              name="breed"
-              list="breeds-datalist"
-              value={formData.breed}
-              onChange={handleChange}
-              placeholder={formData.species === 'dog' ? 'Ej. Golden Retriever, Bulldog Francés...' : 'Ej. Siamés, Persa, Scottish Fold...'}
-            />
-            <datalist id="breeds-datalist">
-              {currentBreedsList.map((b) => (
-                <option key={b} value={b} />
-              ))}
-            </datalist>
-
-            {/* Accesos rápidos a razas populares */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
-              <span style={{ fontSize: '11px', color: '#A8A29E', alignSelf: 'center' }}>Sugerencias:</span>
-              {popularQuickBreeds.map((quickB) => (
-                <button
-                  type="button"
-                  key={quickB}
-                  onClick={() => setFormData(prev => ({ ...prev, breed: quickB }))}
-                  style={{
-                    background: formData.breed === quickB ? '#FFA800' : '#F5EFE6',
-                    color: formData.breed === quickB ? '#FFFFFF' : '#44403C',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '3px 8px',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
+              <div className="form-group">
+                <label className="form-label">Sexo</label>
+                <select
+                  className="form-select"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
                 >
-                  {quickB}
-                </button>
-              ))}
+                  <option value="Macho">Macho</option>
+                  <option value="Hembra">Hembra</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          {/* Edad y Sexo */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            <div className="form-group">
-              <label className="form-label">Edad</label>
-              <input
-                className="form-input"
-                name="age"
-                value={formData.age}
-                onChange={handleChange}
-                placeholder="Ej. 2 años / 8 meses"
-              />
+          {/* SECCIÓN 2: SALUD E IDENTIFICACIÓN */}
+          <div className="form-card-section">
+            <div className="form-section-header">
+              <ShieldCheck size={16} color="#059669" />
+              <span>2. Salud & Microchip</span>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Sexo</label>
-              <select
-                className="form-select"
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-              >
-                <option value="Macho">Macho</option>
-                <option value="Hembra">Hembra</option>
-              </select>
-            </div>
-          </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Estado de Vacunación</label>
+                <select
+                  className="form-select"
+                  name="vaccinated"
+                  value={formData.vaccinated}
+                  onChange={handleChange}
+                >
+                  <option value="Sí, al día">Sí, al día</option>
+                  <option value="En proceso">En proceso</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
 
-          {/* Vacunación y Microchip */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            <div className="form-group">
-              <label className="form-label">Vacunado</label>
-              <select
-                className="form-select"
-                name="vaccinated"
-                value={formData.vaccinated}
-                onChange={handleChange}
-              >
-                <option value="Sí, al día">Sí, al día</option>
-                <option value="En proceso">En proceso</option>
-                <option value="No">No</option>
-              </select>
+              <div className="form-group">
+                <label className="form-label">Microchip ID (Opcional)</label>
+                <input
+                  className="form-input"
+                  name="microchip"
+                  value={formData.microchip}
+                  onChange={handleChange}
+                  placeholder="Ej. 982-0192-VE"
+                />
+              </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Microchip ID (Opcional)</label>
-              <input
-                className="form-input"
-                name="microchip"
-                value={formData.microchip}
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Alergias o Cuidados Médicos</label>
+              <textarea
+                className="form-textarea"
+                name="medicalNotes"
+                rows={2}
+                value={formData.medicalNotes}
                 onChange={handleChange}
-                placeholder="Ej. 982-0192-VE"
+                placeholder="Ej. Alérgico al pollo, medicación especial, muy tímido..."
               />
             </div>
           </div>
 
-          {/* Recompensa */}
-          <div className="form-group">
-            <label className="form-label">Recompensa en caso de extravío (Opcional)</label>
-            <input
-              className="form-input"
-              name="reward"
-              value={formData.reward}
-              onChange={handleChange}
-              placeholder="Ej. Se gratificará generosamente"
-            />
-          </div>
-
-          {/* Datos del Dueño para Emergencias */}
-          <div style={{
-            background: '#FFF8EC',
-            padding: '14px',
-            borderRadius: '16px',
-            border: '1px solid #F3E8D6',
-            margin: '12px 0 16px 0'
-          }}>
-            <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#1C1917', marginBottom: '10px', textTransform: 'uppercase' }}>
-              Contacto del Dueño (Emergencias)
-            </h4>
+          {/* SECCIÓN 3: CONTACTO DE EMERGENCIA */}
+          <div className="form-card-section emergency-highlight-section">
+            <div className="form-section-header emergency-header-text">
+              <Phone size={16} color="#C2410C" />
+              <span>3. Contacto del Dueño (Emergencias)</span>
+            </div>
 
             <div className="form-group">
-              <label className="form-label">Nombre del Dueño *</label>
+              <label className="form-label">Nombre del Dueño / Responsable *</label>
               <input
                 className="form-input"
                 name="owner.name"
@@ -388,7 +338,7 @@ export default function PetFormModal({ initialPet, onSave, onClose }) {
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div className="form-row">
               <div className="form-group">
                 <label className="form-label">Teléfono WhatsApp *</label>
                 <input
@@ -413,36 +363,36 @@ export default function PetFormModal({ initialPet, onSave, onClose }) {
               </div>
             </div>
 
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Ciudad / Sector habitual</label>
-              <input
-                className="form-input"
-                name="owner.address"
-                value={formData.owner.address}
-                onChange={handleChange}
-                placeholder="Ej. Altamira, Caracas"
-              />
-            </div>
-          </div>
+            <div className="form-row">
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Ciudad / Sector habitual</label>
+                <input
+                  className="form-input"
+                  name="owner.address"
+                  value={formData.owner.address}
+                  onChange={handleChange}
+                  placeholder="Ej. Altamira, Caracas"
+                />
+              </div>
 
-          {/* Cuidados Especiales */}
-          <div className="form-group">
-            <label className="form-label">Cuidados Médicos o Alergias</label>
-            <textarea
-              className="form-textarea"
-              name="medicalNotes"
-              rows={2}
-              value={formData.medicalNotes}
-              onChange={handleChange}
-              placeholder="Ej. Alérgico a ciertos alimentos, medicación diaria..."
-            />
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Recompensa (Opcional)</label>
+                <input
+                  className="form-input"
+                  name="reward"
+                  value={formData.reward}
+                  onChange={handleChange}
+                  placeholder="Ej. Recompensa garantizada"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
             className="btn-pill-action"
-            style={{ marginTop: '10px', width: '100%' }}
+            style={{ width: '100%', marginTop: '4px' }}
           >
             <div className="btn-pill-icon-circle">
               <Check size={20} strokeWidth={3} />

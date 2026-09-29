@@ -180,43 +180,41 @@ export default function App() {
         )}
       </main>
 
-      {/* Bottom Floating Navigation (when in dashboard or onboarding) */}
-      {currentView !== 'profile' && (
-        <nav className="bottom-nav">
-          <button
-            className={`bottom-nav-item ${currentView === 'onboarding' ? 'active' : ''}`}
-            onClick={() => setCurrentView('onboarding')}
-          >
-            <Sparkles size={20} />
-            <span>Inicio</span>
-          </button>
+      {/* Bottom Fixed Navigation Bar (Always Visible) */}
+      <nav className="bottom-nav">
+        <button
+          className={`bottom-nav-item ${currentView === 'onboarding' ? 'active' : ''}`}
+          onClick={() => setCurrentView('onboarding')}
+        >
+          <Sparkles size={20} />
+          <span>Inicio</span>
+        </button>
 
-          <button
-            className={`bottom-nav-item ${currentView === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setCurrentView('dashboard')}
-          >
-            <Home size={20} />
-            <span>Mis Placas</span>
-          </button>
+        <button
+          className={`bottom-nav-item ${currentView === 'dashboard' ? 'active' : ''}`}
+          onClick={() => setCurrentView('dashboard')}
+        >
+          <Home size={20} />
+          <span>Mis Placas</span>
+        </button>
 
-          <button
-            className="bottom-nav-item"
-            onClick={() => setIsScannerOpen(true)}
-          >
-            <QrCode size={20} />
-            <span>Escanear</span>
-          </button>
+        <button
+          className="bottom-nav-item"
+          onClick={() => setIsScannerOpen(true)}
+        >
+          <QrCode size={20} />
+          <span>Escanear</span>
+        </button>
 
-          <button
-            className="bottom-nav-item"
-            onClick={() => setEditingPet(false)}
-            style={{ color: '#F57C00' }}
-          >
-            <PlusCircle size={20} />
-            <span>Crear Placa</span>
-          </button>
-        </nav>
-      )}
+        <button
+          className="bottom-nav-item"
+          onClick={() => setEditingPet(false)}
+          style={{ color: '#F57C00' }}
+        >
+          <PlusCircle size={20} />
+          <span>Crear Placa</span>
+        </button>
+      </nav>
 
       {/* Modals */}
       {qrModalPet && (
