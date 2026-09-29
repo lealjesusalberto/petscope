@@ -15,8 +15,13 @@ export default function Navbar({ currentView, onNavigate, onOpenScanner, onAddNe
               <path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z" fill="currentColor"/>
             </svg>
           </div>
-          <div className="brand-title">
-            Q-<span>pet</span>
+          <div className="brand-text-block">
+            <div className="brand-title">
+              <span className="brand-letter-q">Q</span>
+              <span className="brand-hyphen">-</span>
+              <span className="brand-pet">pet</span>
+            </div>
+            <span className="brand-subtitle-tag">Smart QR ID</span>
           </div>
         </div>
 

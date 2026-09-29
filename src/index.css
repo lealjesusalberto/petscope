@@ -113,32 +113,72 @@ body {
 .brand-badge {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
   text-decoration: none;
+  user-select: none;
+  padding: 2px 0;
 }
 
 .brand-icon {
-  width: 40px;
-  height: 40px;
-  background: var(--primary-gradient);
-  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #FFA800 0%, #F57C00 100%);
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #FFFFFF;
-  box-shadow: 0 4px 12px var(--primary-glow);
+  box-shadow: 0 4px 14px rgba(255, 168, 0, 0.38);
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  transition: transform 0.2s ease;
+}
+
+.brand-badge:hover .brand-icon {
+  transform: scale(1.04);
+}
+
+.brand-text-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .brand-title {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--text-dark);
-  letter-spacing: -0.3px;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.6px;
+  display: flex;
+  align-items: center;
 }
 
-.brand-title span {
-  color: var(--primary-hover);
+.brand-letter-q {
+  color: #1C1917;
+  font-weight: 900;
+  font-size: 23px;
+}
+
+.brand-hyphen {
+  color: #FFA800;
+  font-weight: 800;
+  margin: 0 1px;
+}
+
+.brand-pet {
+  color: #F57C00;
+  font-weight: 800;
+}
+
+.brand-subtitle-tag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #A8A29E;
+  margin-top: 3px;
+  line-height: 1;
 }
 
 /* Desktop Navigation Links */
