@@ -1,7 +1,17 @@
-import React from 'react';
-import { QrCode, Plus, Sparkles, Home } from 'lucide-react';
+import React, { useState } from 'react';
+import { QrCode, Plus, Sparkles, Home, User, LogOut, CheckCircle } from 'lucide-react';
 
-export default function Navbar({ currentView, onNavigate, onOpenScanner, onAddNewPet }) {
+export default function Navbar({
+  currentView,
+  onNavigate,
+  onOpenScanner,
+  onAddNewPet,
+  currentUser,
+  onOpenAuth,
+  onLogout
+}) {
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
   return (
     <header className="app-header">
       <div className="header-inner">
@@ -61,6 +71,104 @@ export default function Navbar({ currentView, onNavigate, onOpenScanner, onAddNe
           >
             <QrCode size={18} />
           </button>
+
+          {/* User Auth Profile Button */}
+          {currentUser ? (
+            <div style={{ position: 'relative' }}>
+              <button
+                className="icon-btn"
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                title={currentUser.displayName || currentUser.email}
+                style={{
+                  border: '1.5px solid #FFA800',
+                  overflow: 'hidden',
+                  padding: 0
+                }}
+              >
+                {currentUser.photoURL ? (
+                  <img
+                    src={currentUser.photoURL}
+                    alt="Perfil"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <span style={{ fontWeight: 800, color: '#D97706', fontSize: '13px' }}>
+                    {(currentUser.displayName || currentUser.email || 'U')[0].toUpperCase()}
+                  </span>
+                )}
+              </button>
+
+              {showUserMenu && (
+                <div style={{
+                  position: 'absolute',
+                  top: '46px',
+                  right: 0,
+                  background: '#FFFFFF',
+                  border: '1.5px solid #F3E8D6',
+                  borderRadius: '16px',
+                  padding: '12px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+                  minWidth: '200px',
+                  zIndex: 60,
+                  animation: 'fadeIn 0.15s ease'
+                }}>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#1C1917', marginBottom: '2px' }}>
+                    {currentUser.displayName || 'Usuario Q-pet'}
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#78716C', marginBottom: '10px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {currentUser.email}
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontSize: '11px',
+                    color: '#059669',
+                    fontWeight: 700,
+                    marginBottom: '10px',
+                    paddingBottom: '8px',
+                    borderBottom: '1px solid #F5EFE6'
+                  }}>
+                    <CheckCircle size={13} />
+                    <span>Conectado a Firebase</span>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      onLogout();
+                    }}
+                    style={{
+                      width: '100%',
+                      background: '#FEE2E2',
+                      color: '#DC2626',
+                      border: 'none',
+                      borderRadius: '10px',
+                      padding: '8px 10px',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <LogOut size={14} />
+                    <span>Cerrar Sesión</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              className="icon-btn"
+              onClick={onOpenAuth}
+              title="Iniciar Sesión / Cuenta"
+              style={{ background: '#FFFDF9' }}
+            >
+              <User size={18} color="#78716C" />
+            </button>
+          )}
 
           {/* Primary Action Button */}
           <button

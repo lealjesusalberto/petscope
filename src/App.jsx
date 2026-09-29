@@ -6,28 +6,82 @@ import PetProfileView from './components/PetProfileView';
 import QrModal from './components/QrModal';
 import PetFormModal from './components/PetFormModal';
 import CameraScannerModal from './components/CameraScannerModal';
-import { loadPets, savePets } from './data/petsData';
-import { Home, Sparkles, QrCode, PlusCircle } from 'lucide-react';
+import AuthModal from './components/AuthModal';
+import { loadPets, savePets, INITIAL_PETS } from './data/petsData';
+import { subscribeToAuth, logout } from './firebase/authService';
+import {
+  subscribeToPets,
+  savePetToFirestore,
+  updatePetStatusInFirestore,
+  fetchPetById,
+  seedInitialPets
+} from './firebase/petService';
+import { Home, Sparkles, QrCode, PlusCircle, Cloud, CloudCheck } from 'lucide-react';
 
 export default function App() {
   const [pets, setPets] = useState(loadPets);
   const [currentView, setCurrentView] = useState('onboarding'); // onboarding | dashboard | profile
   const [selectedPet, setSelectedPet] = useState(null);
   const [qrModalPet, setQrModalPet] = useState(null);
-  const [editingPet, setEditingPet] = useState(null); // null when modal closed, false or pet object when open
+  const [editingPet, setEditingPet] = useState(null);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [notification, setNotification] = useState('');
+  const [cloudSynced, setCloudSynced] = useState(false);
 
-  // Handle URL parameters on initial load (e.g. when an actual QR tag is scanned!)
+  // Subscribe to Firebase Authentication
+  useEffect(() => {
+    const unsubscribeAuth = subscribeToAuth((user) => {
+      setCurrentUser(user);
+      if (user) {
+        showToast(`¡Hola, ${user.displayName || user.email}!`);
+      }
+    });
+    return () => unsubscribeAuth();
+  }, []);
+
+  // Subscribe to Firestore Real-Time Pets Collection
+  useEffect(() => {
+    const unsubscribeFirestore = subscribeToPets(
+      (firestorePets, isEmpty) => {
+        if (isEmpty) {
+          // If Firestore collection is empty, auto-seed with initial demo pets
+          seedInitialPets().catch((err) => console.warn('Could not auto-seed Firestore:', err));
+        } else if (firestorePets && firestorePets.length > 0) {
+          setPets(firestorePets);
+          savePets(firestorePets);
+          setCloudSynced(true);
+        }
+      },
+      (err) => {
+        console.warn('Working in offline/local mode with localStorage:', err);
+        setCloudSynced(false);
+      }
+    );
+
+    return () => unsubscribeFirestore();
+  }, []);
+
+  // Handle URL query parameters on initial load (QR scan direct navigation)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const petId = params.get('id');
     if (petId) {
+      // First check local list
       const matched = pets.find((p) => p.id === petId);
       if (matched) {
         setSelectedPet(matched);
         setCurrentView('profile');
       }
+
+      // Also fetch directly from Firestore in real-time
+      fetchPetById(petId).then((cloudPet) => {
+        if (cloudPet) {
+          setSelectedPet(cloudPet);
+          setCurrentView('profile');
+        }
+      });
     }
   }, [pets]);
 
@@ -42,28 +96,41 @@ export default function App() {
     setTimeout(() => setNotification(''), 3000);
   };
 
-  // Toggle pet lost / safe status
-  const handleToggleStatus = (petId) => {
+  // Toggle pet lost / safe status (Local + Firestore sync)
+  const handleToggleStatus = async (petId) => {
+    const targetPet = pets.find((p) => p.id === petId);
+    if (!targetPet) return;
+
+    const nextStatus = targetPet.status === 'lost' ? 'safe' : 'lost';
+
     const updated = pets.map((p) => {
       if (p.id === petId) {
-        const nextStatus = p.status === 'lost' ? 'safe' : 'lost';
-        showToast(
-          nextStatus === 'lost'
-            ? `¡Alerta activada! ${p.name} marcado como extraviado.`
-            : `¡Excelente noticia! ${p.name} está a salvo en casa.`
-        );
         return { ...p, status: nextStatus };
       }
       return p;
     });
+
     updatePetsList(updated);
     if (selectedPet && selectedPet.id === petId) {
       setSelectedPet(updated.find((p) => p.id === petId));
     }
+
+    showToast(
+      nextStatus === 'lost'
+        ? `¡Alerta activada! ${targetPet.name} marcado como extraviado.`
+        : `¡Excelente noticia! ${targetPet.name} está a salvo en casa.`
+    );
+
+    // Sync status change to Firestore
+    try {
+      await updatePetStatusInFirestore(petId, nextStatus);
+    } catch (err) {
+      console.warn('Could not sync status to Firestore:', err);
+    }
   };
 
-  // Save pet (add or update)
-  const handleSavePet = (savedPet) => {
+  // Save pet (add or update in Local + Firestore)
+  const handleSavePet = async (savedPet) => {
     const exists = pets.some((p) => p.id === savedPet.id);
     let updated;
     if (exists) {
@@ -71,43 +138,63 @@ export default function App() {
       showToast(`Datos de ${savedPet.name} actualizados.`);
     } else {
       updated = [savedPet, ...pets];
-      showToast(`¡Placa de ${savedPet.name} generada con éxito!`);
+      showToast(`¡Placa de ${savedPet.name} guardada con éxito!`);
     }
+
     updatePetsList(updated);
     setEditingPet(null);
     setSelectedPet(savedPet);
-    setQrModalPet(savedPet); // Directly show their new QR tag!
+    setQrModalPet(savedPet);
+
+    // Sync to Firestore in background
+    try {
+      await savePetToFirestore(savedPet, currentUser?.uid);
+    } catch (err) {
+      console.warn('Could not save to Firestore, stored locally:', err);
+    }
   };
 
   // Handle QR scanner detection
-  const handleScanSuccess = (decodedText) => {
+  const handleScanSuccess = async (decodedText) => {
     setIsScannerOpen(false);
+    let petId = null;
+
     try {
-      // Look for id parameter
       const url = new URL(decodedText, window.location.origin);
-      const petId = url.searchParams.get('id');
-      if (petId) {
-        const found = pets.find((p) => p.id === petId);
-        if (found) {
-          setSelectedPet(found);
-          setCurrentView('profile');
-          showToast(`¡Placa de ${found.name} detectada!`);
-          return;
-        }
-      }
+      petId = url.searchParams.get('id');
     } catch {
-      // Fallback: check if text itself is pet id
-      const found = pets.find((p) => p.id === decodedText);
+      petId = decodedText;
+    }
+
+    if (petId) {
+      const found = pets.find((p) => p.id === petId);
       if (found) {
         setSelectedPet(found);
         setCurrentView('profile');
         showToast(`¡Placa de ${found.name} detectada!`);
         return;
       }
+
+      // If not in local list, check Firestore in real-time
+      const cloudPet = await fetchPetById(petId);
+      if (cloudPet) {
+        setSelectedPet(cloudPet);
+        setCurrentView('profile');
+        showToast(`¡Placa de ${cloudPet.name} detectada desde la nube!`);
+        return;
+      }
     }
 
-    // Default if not matching existing pet
     showToast('Código escaneado: ' + decodedText.substring(0, 35));
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      showToast('Sesión cerrada');
+    } catch (err) {
+      console.error('Error logging out:', err);
+    }
   };
 
   return (
@@ -138,15 +225,16 @@ export default function App() {
         </div>
       )}
 
-      {/* Top Navbar (hidden on profile view for full immersion) */}
-      {currentView !== 'profile' && (
-        <Navbar
-          currentView={currentView}
-          onNavigate={(view) => setCurrentView(view)}
-          onOpenScanner={() => setIsScannerOpen(true)}
-          onAddNewPet={() => setEditingPet(false)}
-        />
-      )}
+      {/* Top Navbar */}
+      <Navbar
+        currentView={currentView}
+        onNavigate={(view) => setCurrentView(view)}
+        onOpenScanner={() => setIsScannerOpen(true)}
+        onAddNewPet={() => setEditingPet(false)}
+        currentUser={currentUser}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onLogout={handleLogout}
+      />
 
       {/* Main Content Area */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -241,6 +329,15 @@ export default function App() {
           demoPets={pets}
           onScanSuccess={handleScanSuccess}
           onClose={() => setIsScannerOpen(false)}
+        />
+      )}
+
+      {isAuthModalOpen && (
+        <AuthModal
+          onClose={() => setIsAuthModalOpen(false)}
+          onSuccess={(user) => {
+            showToast(`¡Sesión iniciada con éxito!`);
+          }}
         />
       )}
     </div>
