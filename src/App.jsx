@@ -29,6 +29,17 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [notification, setNotification] = useState('');
   const [cloudSynced, setCloudSynced] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
+
+  const handleStartAddNewPet = () => {
+    if (!currentUser) {
+      setPendingAction('addNewPet');
+      showToast('Crea tu cuenta o inicia sesión para registrar tu mascota.');
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setEditingPet(false);
+  };
 
   // Subscribe to Firebase Authentication
   useEffect(() => {
@@ -247,7 +258,7 @@ export default function App() {
         currentView={currentView}
         onNavigate={(view) => setCurrentView(view)}
         onOpenScanner={() => setIsScannerOpen(true)}
-        onAddNewPet={() => setEditingPet(false)}
+        onAddNewPet={handleStartAddNewPet}
         currentUser={currentUser}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onLogout={handleLogout}
@@ -257,7 +268,7 @@ export default function App() {
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {currentView === 'onboarding' && (
           <OnboardingView
-            onGetStarted={() => setEditingPet(false)}
+            onGetStarted={handleStartAddNewPet}
             onExploreDemo={() => setCurrentView('dashboard')}
           />
         )}
@@ -271,7 +282,7 @@ export default function App() {
               setCurrentView('profile');
             }}
             onOpenQr={(pet) => setQrModalPet(pet)}
-            onAddNewPet={() => setEditingPet(false)}
+            onAddNewPet={handleStartAddNewPet}
             onEditPet={(pet) => setEditingPet(pet)}
             onToggleStatus={handleToggleStatus}
           />
@@ -314,7 +325,7 @@ export default function App() {
 
         <button
           className="bottom-nav-item"
-          onClick={() => setEditingPet(false)}
+          onClick={handleStartAddNewPet}
           style={{ color: '#F57C00' }}
         >
           <PlusCircle size={20} />
@@ -338,6 +349,10 @@ export default function App() {
         <PetFormModal
           initialPet={editingPet || null}
           currentUser={currentUser}
+          onRequireAuth={() => {
+            setPendingAction('addNewPet');
+            setIsAuthModalOpen(true);
+          }}
           onSave={handleSavePet}
           onClose={() => setEditingPet(null)}
         />
@@ -353,9 +368,19 @@ export default function App() {
 
       {isAuthModalOpen && (
         <AuthModal
-          onClose={() => setIsAuthModalOpen(false)}
+          initialMode={pendingAction ? 'register' : 'login'}
+          customReason={pendingAction === 'addNewPet' ? 'Crea tu cuenta o inicia sesión para registrar tu mascota y activar su placa' : ''}
+          onClose={() => {
+            setIsAuthModalOpen(false);
+            setPendingAction(null);
+          }}
           onSuccess={(user) => {
-            showToast(`¡Sesión iniciada con éxito!`);
+            showToast(`¡Sesión activa como ${user.displayName || user.email}!`);
+            setIsAuthModalOpen(false);
+            if (pendingAction === 'addNewPet') {
+              setPendingAction(null);
+              setEditingPet(false);
+            }
           }}
         />
       )}

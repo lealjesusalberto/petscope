@@ -3,8 +3,8 @@ import { X, LogIn, UserPlus, Mail, Lock, User, AlertCircle, Sparkles } from 'luc
 import { loginWithEmail, registerWithEmail, loginWithGoogle, getAuthErrorMessage } from '../firebase/authService';
 import confetti from 'canvas-confetti';
 
-export default function AuthModal({ onClose, onSuccess }) {
-  const [isRegister, setIsRegister] = useState(false);
+export default function AuthModal({ onClose, onSuccess, initialMode = 'login', customReason = '' }) {
+  const [isRegister, setIsRegister] = useState(initialMode === 'register');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -82,6 +82,25 @@ export default function AuthModal({ onClose, onSuccess }) {
             <X size={18} />
           </button>
         </div>
+
+        {customReason && (
+          <div style={{
+            background: '#FEF3C7',
+            border: '1px solid #FDE68A',
+            color: '#92400E',
+            padding: '10px 14px',
+            borderRadius: '12px',
+            fontSize: '13px',
+            fontWeight: 700,
+            marginBottom: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <Sparkles size={16} color="#D97706" style={{ flexShrink: 0 }} />
+            <span>{customReason}</span>
+          </div>
+        )}
 
         {/* Tab switchers */}
         <div style={{

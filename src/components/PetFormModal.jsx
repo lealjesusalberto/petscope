@@ -70,7 +70,7 @@ function compressImageFile(file, maxDimension = 1200, quality = 0.88) {
 }
 
 
-export default function PetFormModal({ initialPet, currentUser, onSave, onClose }) {
+export default function PetFormModal({ initialPet, currentUser, onRequireAuth, onSave, onClose }) {
   const isEditing = Boolean(initialPet?.id);
   const [isBreedPickerOpen, setIsBreedPickerOpen] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
@@ -157,6 +157,11 @@ export default function PetFormModal({ initialPet, currentUser, onSave, onClose 
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!currentUser) {
+      setError('Debes iniciar sesión o crear tu cuenta para publicar esta mascota.');
+      if (onRequireAuth) onRequireAuth();
+      return;
+    }
     if (!formData.name.trim()) {
       setError('Por favor ingresa el nombre de la mascota.');
       return;
@@ -209,6 +214,44 @@ export default function PetFormModal({ initialPet, currentUser, onSave, onClose 
           <div className="modal-error-banner">
             <AlertCircle size={16} />
             <span>{error}</span>
+          </div>
+        )}
+
+        {!currentUser && (
+          <div style={{
+            background: '#FEF2F2',
+            border: '1.5px solid #FCA5A5',
+            borderRadius: '16px',
+            padding: '12px 16px',
+            marginBottom: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '10px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AlertCircle size={18} color="#DC2626" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: '13px', fontWeight: 700, color: '#991B1B' }}>
+                Debes iniciar sesión o registrarte para publicar tu mascota
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={onRequireAuth}
+              style={{
+                background: '#DC2626',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '6px 14px',
+                fontSize: '12px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                flexShrink: 0
+              }}
+            >
+              Iniciar Sesión
+            </button>
           </div>
         )}
 
