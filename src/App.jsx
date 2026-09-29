@@ -51,10 +51,14 @@ export default function App() {
         } else if (firestorePets && firestorePets.length > 0) {
           setPets((prevPets) => {
             const merged = [...firestorePets];
-            // Keep any locally created pets that might not be in Firestore yet
+            // Keep any locally created pets that might not be in Firestore yet, and auto-sync them to the cloud
             prevPets.forEach((localPet) => {
               if (!merged.some((cloudPet) => cloudPet.id === localPet.id)) {
                 merged.unshift(localPet);
+                // Proactively push missing local pet to Firestore
+                savePetToFirestore(localPet).catch((err) => {
+                  console.warn('Auto-sync of local pet to Firestore failed:', err);
+                });
               }
             });
             savePets(merged);
@@ -155,12 +159,15 @@ export default function App() {
     setSelectedPet(savedPet);
     setQrModalPet(savedPet);
     setCurrentView('dashboard');
+    showToast(`Guardando ${savedPet.name}...`);
 
-    // Sync to Firestore in background
+    // Sync to Firestore in background with feedback
     try {
       await savePetToFirestore(savedPet, currentUser?.uid);
+      showToast(`¡${savedPet.name} sincronizado en Firestore!`);
     } catch (err) {
-      console.warn('Could not save to Firestore, stored locally:', err);
+      console.error('[Firestore Error] Could not save to Firestore:', err);
+      showToast(`Guardado en este dispositivo (Aviso nube: ${err.message || 'Error'})`);
     }
   };
 

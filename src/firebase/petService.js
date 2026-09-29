@@ -16,6 +16,13 @@ import { INITIAL_PETS } from "../data/petsData";
 
 const COLLECTION_NAME = "pets";
 
+// Helper to remove any undefined values so Firestore doesn't throw unsupported field errors
+function sanitizeForFirestore(obj) {
+  return JSON.parse(
+    JSON.stringify(obj, (key, value) => (value === undefined ? null : value))
+  );
+}
+
 /**
  * Subscribe to real-time updates of all pets in Firestore
  */
@@ -70,20 +77,52 @@ export async function fetchPetById(petId) {
 }
 
 /**
- * Save (create or update) a pet in Firestore
+ * Save (create or update) a pet in Firestore with full sanitization and size safety
  */
 export async function savePetToFirestore(petData, userId = null) {
   const cleanId = petData.id || `pet-${Date.now()}`;
   const petRef = doc(db, COLLECTION_NAME, cleanId);
 
-  const payload = {
-    ...petData,
-    id: cleanId,
-    ownerId: userId || petData.ownerId || null,
-    updatedAt: new Date().toISOString()
-  };
+  // Guarantee photo doesn't exceed Firestore 1MB document limit
+  let safePhoto = petData.photo || (petData.species === 'dog' ? '/assets/husky.jpg' : '/assets/cat-hero.jpg');
+  if (typeof safePhoto === 'string' && safePhoto.length > 800000) {
+    console.warn(`[Firestore] Photo size (${safePhoto.length} chars) is too large for Firestore limit. Using fallback.`);
+    safePhoto = petData.species === 'dog' ? '/assets/husky.jpg' : '/assets/cat-hero.jpg';
+  }
 
+  const payload = sanitizeForFirestore({
+    id: cleanId,
+    name: petData.name || '',
+    species: petData.species || 'dog',
+    breed: petData.breed || (petData.species === 'dog' ? 'Siberian Husky' : 'Mestizo / Común'),
+    age: petData.age || '',
+    gender: petData.gender || 'Macho',
+    vaccinated: petData.vaccinated || 'Sí, al día',
+    weight: petData.weight || '',
+    color: petData.color || '',
+    microchip: petData.microchip || '',
+    status: petData.status || 'safe',
+    photo: safePhoto,
+    about: petData.about || '',
+    medicalNotes: petData.medicalNotes || '',
+    reward: petData.reward || null,
+    ownerId: userId || petData.ownerId || null,
+    ownerEmail: petData.ownerEmail || null,
+    owner: {
+      name: petData.owner?.name || 'Dueño Responsable',
+      phone: petData.owner?.phone || '',
+      phoneFormatted: petData.owner?.phoneFormatted || petData.owner?.phone || '',
+      altPhone: petData.owner?.altPhone || '',
+      address: petData.owner?.address || '',
+      email: petData.owner?.email || ''
+    },
+    updatedAt: new Date().toISOString(),
+    createdAt: petData.createdAt || new Date().toISOString()
+  });
+
+  console.log(`[Firestore] Saving pet ${cleanId} to collection 'pets'...`, payload);
   await setDoc(petRef, payload, { merge: true });
+  console.log(`[Firestore] Successfully saved pet ${cleanId} (${payload.name})`);
   return payload;
 }
 
