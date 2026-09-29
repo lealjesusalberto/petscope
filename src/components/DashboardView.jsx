@@ -176,7 +176,7 @@ export default function DashboardView({
                 title="Ver medalla para collar"
               >
                 <QrCode size={15} />
-                <span>Ver Placa QR</span>
+                <span className="btn-label">Placa QR</span>
               </button>
 
               <button
@@ -185,7 +185,7 @@ export default function DashboardView({
                 title="Ver lo que ve quien escanea la placa"
               >
                 <ExternalLink size={15} />
-                <span>Ficha Pública</span>
+                <span className="btn-label">Ficha</span>
               </button>
 
               <button
