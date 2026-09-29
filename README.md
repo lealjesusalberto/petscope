@@ -1,4 +1,4 @@
-# PetScope • Patitas Pass 🐾
+# Q-pet 🐾
 
 Sistema web inteligente para la generación, gestión y escaneo de placas QR de identificación para mascotas (perros y gatos), con contacto inmediato vía WhatsApp, llamada telefónica y envío de ubicación GPS en tiempo real.
 

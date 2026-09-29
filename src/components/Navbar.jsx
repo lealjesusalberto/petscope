@@ -16,7 +16,7 @@ export default function Navbar({ currentView, onNavigate, onOpenScanner, onAddNe
             </svg>
           </div>
           <div className="brand-title">
-            Patitas<span>Pass</span>
+            Q-<span>pet</span>
           </div>
         </div>
 

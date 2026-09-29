@@ -1,5 +1,4 @@
-// Initial pet database and local storage helper
-const STORAGE_KEY = 'patitas_pass_pets_v2';
+const STORAGE_KEY = 'qpet_pets_v1';
 
 export const INITIAL_PETS = [
   {

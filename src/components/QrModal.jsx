@@ -101,7 +101,7 @@ export default function QrModal({ pet, onClose, onOpenProfile }) {
 
           {/* Tag Title */}
           <div style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', color: '#B45309', marginBottom: '8px' }}>
-            Patitas Pass • ID Oficial
+            Q-pet • ID Oficial
           </div>
 
           {/* QR Code Container */}
