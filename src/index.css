@@ -2369,3 +2369,124 @@ body {
   box-shadow: 0 4px 16px rgba(245, 158, 11, 0.12);
 }
 
+/* ==========================================================================
+   Photo Uploader & High-Definition Image Rendering
+   ========================================================================== */
+
+.photo-uploader-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.photo-preview-thumbnail {
+  width: 76px;
+  height: 76px;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 2px solid #F3E8D6;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+  background: #F5EFE6;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: auto;
+}
+
+.photo-actions-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.btn-upload-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #FFFBEB;
+  color: #B45309;
+  border: 1.5px dashed #F59E0B;
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+
+.btn-upload-file:hover {
+  background: #FEF3C7;
+  border-color: #D97706;
+  transform: translateY(-1px);
+}
+
+.photo-hint-text {
+  font-size: 11px;
+  color: #78716C;
+  font-weight: 600;
+}
+
+.avatar-presets-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 4px 0 2px;
+}
+
+.avatar-presets-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.avatar-preset-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: #FFFFFF;
+  border: 1.5px solid #F0ECE1;
+  border-radius: 12px;
+  padding: 5px 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.avatar-preset-btn:hover {
+  border-color: #FFA800;
+  transform: translateY(-1px);
+}
+
+.avatar-preset-btn.active {
+  border-color: #D97706;
+  background: #FEF3C7;
+  box-shadow: 0 0 0 2px #F59E0B;
+}
+
+.preset-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #F5EFE6;
+}
+
+.avatar-preset-btn span {
+  font-size: 10px;
+  font-weight: 700;
+  color: #57534E;
+}
+
+/* Sharp Rendering for Mobile Displays */
+.profile-hero-img,
+.pet-avatar-img,
+.photo-preview-thumbnail {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: auto;
+  transform: translateZ(0);
+}
+
+

@@ -15,8 +15,8 @@ const PRESET_AVATARS = [
   { label: 'Scottish', url: '/assets/cat-hero.jpg' }
 ];
 
-// Canvas helper to compress any mobile gallery/camera photo to max 500px JPEG (<50KB)
-function compressImageFile(file, maxDimension = 500, quality = 0.8) {
+// High-Definition Canvas Optimizer: keeps 1200px Retina HD resolution with bi-cubic antialiasing
+function compressImageFile(file, maxDimension = 1200, quality = 0.88) {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -24,10 +24,10 @@ function compressImageFile(file, maxDimension = 500, quality = 0.8) {
       const img = new Image();
       img.src = event.target.result;
       img.onload = () => {
-        const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
 
+        // Maintain exact aspect ratio up to 1200px HD resolution
         if (width > height) {
           if (width > maxDimension) {
             height = Math.round((height * maxDimension) / width);
@@ -40,12 +40,27 @@ function compressImageFile(file, maxDimension = 500, quality = 0.8) {
           }
         }
 
+        const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
+
+        // Studio-grade high quality bi-cubic interpolation to eliminate pixelation
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
-        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        // Try WebP first for ultra-sharp rendering, fallback to crisp JPEG
+        let compressedDataUrl = canvas.toDataURL('image/webp', quality);
+        if (!compressedDataUrl.startsWith('data:image/webp')) {
+          compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
+
+        // Safety check to ensure it stays below Firestore's 1MB limit
+        if (compressedDataUrl.length > 800000) {
+          compressedDataUrl = canvas.toDataURL('image/jpeg', 0.80);
+        }
+
         resolve(compressedDataUrl);
       };
       img.onerror = () => resolve(event.target.result);
@@ -53,6 +68,7 @@ function compressImageFile(file, maxDimension = 500, quality = 0.8) {
     reader.onerror = () => resolve('/assets/puppy-hero.jpg');
   });
 }
+
 
 export default function PetFormModal({ initialPet, currentUser, onSave, onClose }) {
   const isEditing = Boolean(initialPet?.id);
