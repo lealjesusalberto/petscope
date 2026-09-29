@@ -80,18 +80,18 @@ export default function DashboardView({
         <div className="dashboard-stats-strip">
           {currentUser && (
             <div className="stat-pill" style={{ background: '#FEF3C7', color: '#92400E' }}>
-              <UserCheck size={14} />
+              <UserCheck size={12} />
               <span className="stat-num">{myPets.length}</span>
               <span className="stat-label">Tuyas</span>
             </div>
           )}
           <div className="stat-pill">
             <span className="stat-num">{pets.length}</span>
-            <span className="stat-label">Total Placas</span>
+            <span className="stat-label">Total</span>
           </div>
           {lostCount > 0 && (
             <div className="stat-pill lost-alert">
-              <ShieldAlert size={14} />
+              <ShieldAlert size={12} />
               <span className="stat-num">{lostCount}</span>
               <span className="stat-label">Extraviado</span>
             </div>
