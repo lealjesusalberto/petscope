@@ -12,9 +12,21 @@ export default function PetProfileView({ pet, onBack, onOpenQr }) {
 
   if (!pet) return null;
 
+  // Clean phone number ensuring Venezuelan +58 international prefix for WhatsApp
+  const getCleanWhatsAppNumber = (rawPhone) => {
+    if (!rawPhone) return '';
+    let digits = rawPhone.replace(/[^0-9]/g, '');
+    if (digits.startsWith('0')) {
+      digits = '58' + digits.substring(1);
+    } else if (!digits.startsWith('58')) {
+      digits = '58' + digits;
+    }
+    return digits;
+  };
+
   // Generate WhatsApp message with GPS or initial text
   const getWhatsAppUrl = (customMsg = null) => {
-    const cleanPhone = (pet.owner?.phone || '').replace(/[^0-9]/g, '');
+    const cleanPhone = getCleanWhatsAppNumber(pet.owner?.phone);
     const defaultText = `¡Hola ${pet.owner?.name || ''}! Acabo de escanear la placa QR de tu mascota *${pet.name}*. Por favor contáctame para coordinar su entrega segura.`;
     const message = encodeURIComponent(customMsg || defaultText);
     return `https://wa.me/${cleanPhone}?text=${message}`;
@@ -227,7 +239,7 @@ export default function PetProfileView({ pet, onBack, onOpenQr }) {
               </a>
 
               <a
-                href={`tel:${pet.owner?.phone}`}
+                href={`tel:+${getCleanWhatsAppNumber(pet.owner?.phone)}`}
                 className="btn-call"
                 id="btn-phone-call"
               >

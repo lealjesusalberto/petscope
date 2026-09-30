@@ -77,20 +77,52 @@ export default function DashboardView({
         </div>
 
         {/* Quick Stats Pill (Occupies 100% width on mobile) */}
-        <div className="dashboard-stats-strip">
-          <div className="dashboard-stats-pills-row">
-            <div className="stat-pill" style={{ background: '#FEF3C7', color: '#92400E' }}>
+        <div className="dashboard-stats-strip" style={{ width: '100%' }}>
+          <div
+            className="dashboard-stats-pills-row"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              width: '100%',
+              gap: '6px',
+              boxSizing: 'border-box'
+            }}
+          >
+            <div
+              className="stat-pill"
+              style={{
+                background: '#FEF3C7',
+                color: '#92400E',
+                width: '100%',
+                justifyContent: 'center',
+                boxSizing: 'border-box'
+              }}
+            >
               <UserCheck size={12} />
               <span className="stat-num">{currentUser ? myPets.length : 0}</span>
               <span className="stat-label">Tuyas</span>
             </div>
 
-            <div className="stat-pill">
+            <div
+              className="stat-pill"
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+                boxSizing: 'border-box'
+              }}
+            >
               <span className="stat-num">{pets.length}</span>
               <span className="stat-label">Total</span>
             </div>
 
-            <div className={`stat-pill ${lostCount > 0 ? 'lost-alert' : 'safe-pill'}`}>
+            <div
+              className={`stat-pill ${lostCount > 0 ? 'lost-alert' : 'safe-pill'}`}
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+                boxSizing: 'border-box'
+              }}
+            >
               {lostCount > 0 ? (
                 <>
                   <ShieldAlert size={12} />

@@ -171,6 +171,29 @@ export default function PetFormModal({ initialPet, currentUser, onRequireAuth, o
       return;
     }
 
+    // Format Venezuelan +58 phone number for 100% WhatsApp compatibility
+    let rawDigits = (formData.owner.phone || '').replace(/[^0-9]/g, '');
+    let cleanDigits = rawDigits;
+    if (rawDigits.startsWith('0')) {
+      cleanDigits = '58' + rawDigits.substring(1);
+    } else if (!rawDigits.startsWith('58')) {
+      cleanDigits = '58' + rawDigits;
+    }
+
+    const internationalPhone = `+${cleanDigits}`;
+    const localPart = cleanDigits.substring(2);
+    const prettyPhone = localPart.length >= 10
+      ? `+58 (${localPart.substring(0, 3)}) ${localPart.substring(3, 6)}-${localPart.substring(6)}`
+      : `+${cleanDigits}`;
+
+    let prettyAlt = formData.owner.altPhone;
+    if (formData.owner.altPhone) {
+      let rawAlt = formData.owner.altPhone.replace(/[^0-9]/g, '');
+      if (rawAlt.startsWith('0')) rawAlt = '58' + rawAlt.substring(1);
+      else if (!rawAlt.startsWith('58')) rawAlt = '58' + rawAlt;
+      prettyAlt = `+${rawAlt}`;
+    }
+
     const updatedPet = {
       ...formData,
       breed: formData.breed || (formData.species === 'dog' ? 'Siberian Husky' : 'Mestizo / Común'),
@@ -179,7 +202,9 @@ export default function PetFormModal({ initialPet, currentUser, onRequireAuth, o
       owner: {
         ...formData.owner,
         name: formData.owner.name || currentUser?.displayName || 'Dueño Responsable',
-        phoneFormatted: formData.owner.phoneFormatted || formData.owner.phone
+        phone: internationalPhone,
+        phoneFormatted: prettyPhone,
+        altPhone: prettyAlt || ''
       }
     };
 
@@ -518,26 +543,60 @@ export default function PetFormModal({ initialPet, currentUser, onRequireAuth, o
 
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Teléfono WhatsApp *</label>
-                <input
-                  className="form-input"
-                  name="owner.phone"
-                  value={formData.owner.phone}
-                  onChange={handleChange}
-                  placeholder="+58 412 1234567"
-                  required
-                />
+                <label className="form-label">Teléfono WhatsApp (Venezuela) *</label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <span style={{
+                    position: 'absolute',
+                    left: '10px',
+                    fontSize: '12px',
+                    fontWeight: 800,
+                    color: '#B45309',
+                    background: '#FEF3C7',
+                    padding: '3px 8px',
+                    borderRadius: '8px',
+                    pointerEvents: 'none',
+                    letterSpacing: '0.3px'
+                  }}>
+                    +58
+                  </span>
+                  <input
+                    className="form-input"
+                    style={{ paddingLeft: '56px' }}
+                    name="owner.phone"
+                    value={formData.owner.phone}
+                    onChange={handleChange}
+                    placeholder="412 1234567 / 0412..."
+                    required
+                  />
+                </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Teléfono Secundario</label>
-                <input
-                  className="form-input"
-                  name="owner.altPhone"
-                  value={formData.owner.altPhone}
-                  onChange={handleChange}
-                  placeholder="+58 414 7654321"
-                />
+                <label className="form-label">Teléfono Secundario (Opcional)</label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <span style={{
+                    position: 'absolute',
+                    left: '10px',
+                    fontSize: '12px',
+                    fontWeight: 800,
+                    color: '#78716C',
+                    background: '#F5EFE6',
+                    padding: '3px 8px',
+                    borderRadius: '8px',
+                    pointerEvents: 'none',
+                    letterSpacing: '0.3px'
+                  }}>
+                    +58
+                  </span>
+                  <input
+                    className="form-input"
+                    style={{ paddingLeft: '56px' }}
+                    name="owner.altPhone"
+                    value={formData.owner.altPhone}
+                    onChange={handleChange}
+                    placeholder="414 7654321..."
+                  />
+                </div>
               </div>
             </div>
 
