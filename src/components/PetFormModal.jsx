@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, Upload, Check, AlertCircle, Sparkles, Heart, Phone, ShieldCheck, ChevronRight, Dog, Cat } from 'lucide-react';
+import { X, Upload, Check, AlertCircle, Sparkles, Heart, Phone, ShieldCheck, ChevronRight, Dog, Cat, Calendar } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DOG_BREEDS, CAT_BREEDS, DOG_BREEDS_CATALOG, CAT_BREEDS_CATALOG } from '../data/breedsData';
 import BreedPickerModal from './BreedPickerModal';
+import { calculateAgeFromBirthDate } from '../utils/ageCalculator';
 
 const PRESET_AVATARS = [
   { label: 'Husky', url: '/assets/husky.jpg' },
@@ -80,7 +81,8 @@ export default function PetFormModal({ initialPet, currentUser, onRequireAuth, o
     name: initialPet?.name || '',
     species: initialPet?.species || 'dog',
     breed: initialPet?.breed || '',
-    age: initialPet?.age || '',
+    birthDate: initialPet?.birthDate || '',
+    age: initialPet?.birthDate ? calculateAgeFromBirthDate(initialPet.birthDate) : (initialPet?.age || ''),
     gender: initialPet?.gender || 'Macho',
     vaccinated: initialPet?.vaccinated || 'Sí, al día',
     weight: initialPet?.weight || '',
@@ -121,6 +123,16 @@ export default function PetFormModal({ initialPet, currentUser, onRequireAuth, o
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleBirthDateChange = (e) => {
+    const bDate = e.target.value;
+    const computedAge = calculateAgeFromBirthDate(bDate);
+    setFormData(prev => ({
+      ...prev,
+      birthDate: bDate,
+      age: computedAge || prev.age
+    }));
   };
 
   const handleFileUpload = async (e) => {
@@ -447,20 +459,45 @@ export default function PetFormModal({ initialPet, currentUser, onRequireAuth, o
               </div>
             </div>
 
-            {/* Edad y Sexo */}
+            {/* Fecha de Nacimiento con Cálculo Dinámico de Edad + Sexo */}
             <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Edad</label>
-                <input
-                  className="form-input"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleChange}
-                  placeholder="Ej. 2 años / 8 meses"
-                />
+              <div className="form-group" style={{ flex: 1.4 }}>
+                <label className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <Calendar size={14} color="#D97706" />
+                    <span>Fecha de Nacimiento *</span>
+                  </span>
+                  {formData.age && (
+                    <span style={{ fontSize: '11px', color: '#059669', fontWeight: 800, animation: 'fadeIn 0.2s ease' }}>
+                      ✓ Edad calculada
+                    </span>
+                  )}
+                </label>
+
+                <div className="birthdate-age-row">
+                  <input
+                    type="date"
+                    className="form-input birthdate-input-field"
+                    name="birthDate"
+                    value={formData.birthDate || ''}
+                    max={new Date().toISOString().split('T')[0]}
+                    onChange={handleBirthDateChange}
+                  />
+
+                  {formData.age ? (
+                    <div className="computed-age-pill" title="Edad calculada desde su fecha de nacimiento">
+                      <Sparkles size={13} color="#D97706" className="sparkle-spin-subtle" />
+                      <span className="computed-age-val">{formData.age}</span>
+                    </div>
+                  ) : (
+                    <div className="computed-age-pill-placeholder" title="Indica la fecha para calcular la edad">
+                      <span>Selecciona fecha</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="form-group">
+              <div className="form-group" style={{ flex: 0.8 }}>
                 <label className="form-label">Sexo</label>
                 <select
                   className="form-select"

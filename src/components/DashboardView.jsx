@@ -5,6 +5,7 @@ import {
   UserCheck, Users
 } from 'lucide-react';
 import { isUserAdmin } from '../firebase/authService';
+import { calculateAgeFromBirthDate } from '../utils/ageCalculator';
 
 export default function DashboardView({
   pets,
@@ -337,7 +338,7 @@ export default function DashboardView({
                   </div>
 
                   <div className="pet-meta-text">
-                    {pet.breed} • {pet.age}
+                    {pet.breed} • {pet.birthDate ? calculateAgeFromBirthDate(pet.birthDate) : pet.age}
                   </div>
 
                   <div className="pet-location-text">

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import {
   MapPin, Phone, MessageCircle, Navigation, ShieldCheck,
-  AlertTriangle, Heart, Award, ArrowLeft, QrCode, Share2, Check
+  AlertTriangle, Heart, Award, ArrowLeft, QrCode, Share2, Check, Calendar
 } from 'lucide-react';
+import { calculateAgeFromBirthDate, formatBirthDateDisplay } from '../utils/ageCalculator';
 
 export default function PetProfileView({ pet, onBack, onOpenQr }) {
   const [gpsLoading, setGpsLoading] = useState(false);
@@ -11,6 +12,8 @@ export default function PetProfileView({ pet, onBack, onOpenQr }) {
   const [copiedLink, setCopiedLink] = useState(false);
 
   if (!pet) return null;
+
+  const displayAge = pet.birthDate ? calculateAgeFromBirthDate(pet.birthDate) : pet.age;
 
   // Clean phone number ensuring Venezuelan +58 international prefix for WhatsApp
   const getCleanWhatsAppNumber = (rawPhone) => {
@@ -198,7 +201,12 @@ export default function PetProfileView({ pet, onBack, onOpenQr }) {
           <div className="metric-pills-row">
             <div className="metric-pill-card">
               <span className="metric-pill-label">Edad</span>
-              <span className="metric-pill-value">{pet.age}</span>
+              <span className="metric-pill-value">{displayAge}</span>
+              {pet.birthDate && (
+                <span style={{ fontSize: '11px', color: '#78716C', marginTop: '3px', fontWeight: 600 }}>
+                  {formatBirthDateDisplay(pet.birthDate)}
+                </span>
+              )}
             </div>
 
             <div className="metric-pill-card">
