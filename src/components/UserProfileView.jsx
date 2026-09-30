@@ -11,6 +11,7 @@ import { compressImageFile } from '../utils/imageCompressor';
 
 export default function UserProfileView({
   currentUser,
+  authLoading = false,
   pets,
   onSelectPet,
   onOpenQr,
@@ -39,7 +40,7 @@ export default function UserProfileView({
     photoURL: currentUser?.photoURL || ''
   });
 
-  // Sync state and fetch extra user document from Firestore if available
+  // Sync state and fetch extra user document from Firestore only if phone/address not in cache
   useEffect(() => {
     if (currentUser) {
       setFormData({
@@ -49,17 +50,19 @@ export default function UserProfileView({
         photoURL: currentUser.photoURL || ''
       });
 
-      fetchUserFirestoreData(currentUser.uid).then((data) => {
-        if (data) {
-          setFormData((prev) => ({
-            ...prev,
-            displayName: data.displayName || prev.displayName,
-            phone: data.phone || prev.phone,
-            address: data.address || prev.address,
-            photoURL: data.photoURL || prev.photoURL
-          }));
-        }
-      });
+      if (currentUser?.uid && (!currentUser.phone || !currentUser.address)) {
+        fetchUserFirestoreData(currentUser.uid).then((data) => {
+          if (data) {
+            setFormData((prev) => ({
+              ...prev,
+              displayName: data.displayName || prev.displayName,
+              phone: data.phone || prev.phone,
+              address: data.address || prev.address,
+              photoURL: data.photoURL || prev.photoURL
+            }));
+          }
+        }).catch(() => {});
+      }
     }
   }, [currentUser]);
 
@@ -206,8 +209,30 @@ export default function UserProfileView({
         )}
       </div>
 
-      {/* Guest Mode View */}
-      {!currentUser ? (
+      {/* If still checking auth session on fresh reload, show sleek skeleton instead of flashing guest card */}
+      {authLoading ? (
+        <div style={{
+          background: '#FFFFFF',
+          border: '1.5px solid #F0ECE1',
+          borderRadius: '24px',
+          padding: '42px 24px',
+          textAlign: 'center',
+          maxWidth: '460px',
+          margin: '28px auto',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.04)'
+        }}>
+          <div className="user-profile-empty-icon-wrap" style={{ width: '56px', height: '56px', margin: '0 auto 12px' }}>
+            <Loader2 size={26} color="#D97706" className="animate-spin" />
+          </div>
+          <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#1C1917', margin: '0 0 6px' }}>
+            Verificando sesión segura...
+          </h3>
+          <p style={{ fontSize: '13px', color: '#78716C', margin: 0 }}>
+            Conectando con tu cuenta Q-pet
+          </p>
+        </div>
+      ) : !currentUser ? (
+        /* Guest Mode View */
         <div style={{
           background: 'linear-gradient(180deg, #FFFFFF 0%, #FFFDF5 100%)',
           border: '1.5px solid #FDE68A',

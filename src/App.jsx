@@ -10,7 +10,7 @@ import PetFormModal from './components/PetFormModal';
 import CameraScannerModal from './components/CameraScannerModal';
 import AuthModal from './components/AuthModal';
 import { loadPets, savePets, INITIAL_PETS } from './data/petsData';
-import { subscribeToAuth, logout, isUserAdmin } from './firebase/authService';
+import { subscribeToAuth, logout, isUserAdmin, getCachedAuthUser } from './firebase/authService';
 import {
   subscribeToPets,
   savePetToFirestore,
@@ -28,7 +28,8 @@ export default function App() {
   const [editingPet, setEditingPet] = useState(null);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(() => getCachedAuthUser());
+  const [authLoading, setAuthLoading] = useState(() => !getCachedAuthUser());
   const [notification, setNotification] = useState('');
   const [cloudSynced, setCloudSynced] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
@@ -43,13 +44,11 @@ export default function App() {
     setEditingPet(false);
   };
 
-  // Subscribe to Firebase Authentication
+  // Subscribe to Firebase Authentication with instant cache & non-blocking resolution
   useEffect(() => {
     const unsubscribeAuth = subscribeToAuth((user) => {
       setCurrentUser(user);
-      if (user) {
-        showToast(`¡Hola, ${user.displayName || user.email}!`);
-      }
+      setAuthLoading(false);
     });
     return () => unsubscribeAuth();
   }, []);
@@ -363,6 +362,7 @@ export default function App() {
         {currentView === 'user-profile' && (
           <UserProfileView
             currentUser={currentUser}
+            authLoading={authLoading}
             pets={pets}
             onSelectPet={(pet) => {
               setSelectedPet(pet);

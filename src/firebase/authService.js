@@ -128,25 +128,99 @@ export async function loginWithGoogle() {
   return userCredential;
 }
 
+const AUTH_CACHE_KEY = 'qpet_cached_auth_user';
+
+/**
+ * Retrieve cached user from localStorage for instant, zero-flicker UI render
+ */
+export function getCachedAuthUser() {
+  try {
+    const raw = localStorage.getItem(AUTH_CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Update cached user in localStorage
+ */
+export function setCachedAuthUser(user) {
+  try {
+    if (!user) {
+      localStorage.removeItem(AUTH_CACHE_KEY);
+    } else {
+      const lightweight = {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || user.email?.split('@')[0] || 'Usuario',
+        photoURL: user.photoURL || null,
+        role: user.role || (isUserAdmin(user) ? 'admin' : 'user'),
+        phone: user.phone || '',
+        address: user.address || ''
+      };
+      localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify(lightweight));
+    }
+  } catch (e) {
+    console.warn('Could not cache auth user:', e);
+  }
+}
+
 /**
  * Sign out current user
  */
 export async function logout() {
+  setCachedAuthUser(null);
   return await signOut(auth);
 }
 
 /**
- * Subscribe to auth state changes and enrich with role
+ * Subscribe to auth state changes - instantly reports authenticated user with zero network block
  */
 export function subscribeToAuth(callback) {
-  return onAuthStateChanged(auth, async (user) => {
+  return onAuthStateChanged(auth, (user) => {
     if (user) {
-      const profile = await syncUserToFirestore(user);
-      user.role = profile?.role || (isUserAdmin(user) ? "admin" : "user");
-      user.phone = profile?.phone || "";
-      user.address = profile?.address || "";
-      callback(user);
+      // 1. Instantly read local cache to prefill role, phone, and address without delay
+      const cached = getCachedAuthUser();
+      const isAdmin = isUserAdmin(user) || cached?.role === 'admin';
+
+      const instantUser = {
+        ...user,
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || cached?.displayName || user.email?.split('@')[0],
+        photoURL: user.photoURL || cached?.photoURL || null,
+        role: isAdmin ? 'admin' : 'user',
+        phone: cached?.phone || '',
+        address: cached?.address || ''
+      };
+
+      // 2. Immediately notify the app (0ms delay) so UI never flashes logged-out state
+      setCachedAuthUser(instantUser);
+      callback(instantUser);
+
+      // 3. Asynchronously sync and enrich with Firestore in background without blocking
+      syncUserToFirestore(user).then((profile) => {
+        if (profile) {
+          const enrichedUser = {
+            ...user,
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || profile.displayName || instantUser.displayName,
+            photoURL: user.photoURL || profile.photoURL || instantUser.photoURL,
+            role: profile.role || instantUser.role,
+            phone: profile.phone || instantUser.phone || '',
+            address: profile.address || instantUser.address || ''
+          };
+          setCachedAuthUser(enrichedUser);
+          callback(enrichedUser);
+        }
+      }).catch((err) => {
+        console.warn('Background syncUserToFirestore error:', err);
+      });
     } else {
+      setCachedAuthUser(null);
       callback(null);
     }
   });
@@ -186,13 +260,17 @@ export async function updateUserProfile({ displayName, photoURL, phone, address 
     console.warn("Could not persist extra profile fields to Firestore:", err);
   }
 
-  return {
+  const updatedUserObj = {
     ...auth.currentUser,
     displayName: auth.currentUser.displayName,
     photoURL: auth.currentUser.photoURL,
     phone: extraData.phone,
-    address: extraData.address
+    address: extraData.address,
+    role: isUserAdmin(auth.currentUser) ? 'admin' : 'user'
   };
+
+  setCachedAuthUser(updatedUserObj);
+  return updatedUserObj;
 }
 
 /**
