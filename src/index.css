@@ -3589,5 +3589,203 @@ button:active, .header-cta-btn:active, .action-btn:active {
   font-size: 12px;
 }
 
+/* ==========================================================================
+   User Profile View & Global Primary / Secondary Buttons
+   ========================================================================== */
+
+.btn-primary {
+  background: linear-gradient(135deg, #FFA800 0%, #EA580C 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 9999px;
+  padding: 11px 22px;
+  font-size: 13.5px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(245, 124, 0, 0.32);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(245, 124, 0, 0.42);
+  filter: brightness(1.03);
+}
+
+.btn-primary:active {
+  transform: scale(0.96);
+}
+
+.btn-secondary {
+  background: #FFFFFF;
+  color: #44403C;
+  border: 1.5px solid #E7E5E4;
+  border-radius: 9999px;
+  padding: 10px 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  background: #F5F5F4;
+  color: #1C1917;
+  border-color: #D6D3D1;
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: scale(0.96);
+}
+
+/* User Profile Luxury Elements */
+.user-profile-page {
+  animation: fadeIn 0.25s ease-out;
+}
+
+.user-profile-hero-card {
+  background: #FFFFFF;
+  border: 1.5px solid #F0ECE1;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  margin-bottom: 28px;
+  position: relative;
+}
+
+.user-profile-hero-banner {
+  height: 90px;
+  background: linear-gradient(135deg, #FFF7ED 0%, #FED7AA 50%, #FDE68A 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.user-profile-hero-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(245, 158, 11, 0.15) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.user-profile-hero-body {
+  padding: 0 24px 24px 24px;
+  position: relative;
+  margin-top: -44px;
+}
+
+.user-profile-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #FFA800 0%, #EA580C 100%);
+  border: 4px solid #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 30px;
+  font-weight: 800;
+  box-shadow: 0 8px 24px rgba(245, 124, 0, 0.32);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.user-profile-stat-box {
+  background: #FAFAF9;
+  border: 1.5px solid #F0ECE1;
+  border-radius: 20px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.2s ease;
+}
+
+.user-profile-stat-box:hover {
+  background: #FFFFFF;
+  border-color: #FDE68A;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+}
+
+.user-profile-empty-card {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFFDF9 100%);
+  border: 2px dashed #FDE68A;
+  border-radius: 28px;
+  padding: 48px 24px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(245, 158, 11, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.user-profile-empty-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #FFA800 0%, #EA580C 50%, #FFA800 100%);
+}
+
+.user-profile-empty-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+  border: 2px solid #FDE68A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.18);
+  animation: pulseGlow 3s infinite ease-in-out;
+}
+
+.profile-cta-btn-primary {
+  background: linear-gradient(135deg, #FFA800 0%, #EA580C 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 9999px;
+  padding: 13px 28px;
+  font-size: 14px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(245, 124, 0, 0.35), 0 2px 6px rgba(234, 88, 12, 0.2);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  user-select: none;
+}
+
+.profile-cta-btn-primary:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(245, 124, 0, 0.45), 0 4px 10px rgba(234, 88, 12, 0.25);
+  filter: brightness(1.04);
+}
+
+.profile-cta-btn-primary:active {
+  transform: scale(0.97);
+}
+
 
 
