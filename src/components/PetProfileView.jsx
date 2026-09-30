@@ -5,14 +5,23 @@ import {
   Calendar, Syringe, Clock, CheckCircle2, Sparkles, Edit3
 } from 'lucide-react';
 import { calculateAgeFromBirthDate, formatBirthDateDisplay } from '../utils/ageCalculator';
+import { isUserAdmin } from '../firebase/authService';
 
-export default function PetProfileView({ pet, onBack, onOpenQr, onEditPet }) {
+export default function PetProfileView({ pet, currentUser, onBack, onOpenQr, onEditPet }) {
   const [gpsLoading, setGpsLoading] = useState(false);
   const [gpsSuccess, setGpsSuccess] = useState(false);
   const [gpsError, setGpsError] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
 
   if (!pet) return null;
+
+  const isMine = currentUser && (
+    (pet.ownerId && pet.ownerId === currentUser.uid) ||
+    (pet.ownerEmail && currentUser.email && pet.ownerEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
+    (pet.owner?.email && currentUser.email && pet.owner.email.toLowerCase() === currentUser.email.toLowerCase())
+  );
+  const isAdmin = isUserAdmin(currentUser);
+  const canEdit = Boolean(isMine || isAdmin);
 
   const displayAge = pet.birthDate ? calculateAgeFromBirthDate(pet.birthDate) : pet.age;
 
@@ -91,7 +100,7 @@ export default function PetProfileView({ pet, onBack, onOpenQr, onEditPet }) {
         </button>
 
         <div className="profile-actions-right">
-          {onEditPet && (
+          {onEditPet && canEdit && (
             <button
               onClick={() => onEditPet(pet)}
               className="profile-circle-btn"
@@ -161,7 +170,7 @@ export default function PetProfileView({ pet, onBack, onOpenQr, onEditPet }) {
                 <span>Ver Medalla QR</span>
               </button>
 
-              {onEditPet && (
+              {onEditPet && canEdit && (
                 <button
                   onClick={() => onEditPet(pet)}
                   className="btn-primary"

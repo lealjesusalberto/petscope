@@ -22,7 +22,12 @@ export default function DashboardView({
 
   const isPetMine = (pet) => {
     if (!currentUser || !currentUser.uid) return false;
-    return Boolean(pet.ownerId && pet.ownerId === currentUser.uid);
+    const matchUid = pet.ownerId && pet.ownerId === currentUser.uid;
+    const matchEmail = (
+      (pet.ownerEmail && currentUser.email && pet.ownerEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
+      (pet.owner?.email && currentUser.email && pet.owner.email.toLowerCase() === currentUser.email.toLowerCase())
+    );
+    return Boolean(matchUid || matchEmail);
   };
 
   const myPets = pets.filter(isPetMine);
@@ -370,14 +375,16 @@ export default function DashboardView({
                   <span className="btn-label">Ver Perfil</span>
                 </button>
 
-                <button
-                  onClick={() => onEditPet(pet)}
-                  className="action-btn edit-btn"
-                  title="Editar información de la mascota"
-                >
-                  <Edit3 size={15} />
-                  <span className="btn-label">Editar</span>
-                </button>
+                {canManage && (
+                  <button
+                    onClick={() => onEditPet(pet)}
+                    className="action-btn edit-btn"
+                    title="Editar información de la mascota"
+                  >
+                    <Edit3 size={15} />
+                    <span className="btn-label">Editar</span>
+                  </button>
+                )}
               </div>
             </div>
           );

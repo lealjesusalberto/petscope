@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import {
   X, Upload, Check, AlertCircle, Sparkles, Heart, Phone, ShieldCheck,
-  ChevronRight, Dog, Cat, Calendar, Syringe, Plus, Trash2, CheckCircle2, Clock
+  ChevronRight, Dog, Cat, Calendar, Syringe, Plus, Trash2, CheckCircle2, Clock, ShieldAlert
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DOG_BREEDS, CAT_BREEDS, DOG_BREEDS_CATALOG, CAT_BREEDS_CATALOG } from '../data/breedsData';
 import { INITIAL_PETS } from '../data/petsData';
 import BreedPickerModal from './BreedPickerModal';
 import { calculateAgeFromBirthDate } from '../utils/ageCalculator';
+import { isUserAdmin } from '../firebase/authService';
 
 const PRESET_AVATARS = [
   { label: 'Husky', url: '/assets/husky.jpg' },
@@ -77,6 +78,34 @@ function compressImageFile(file, maxDimension = 1200, quality = 0.88) {
 
 export default function PetFormModal({ initialPet, currentUser, onRequireAuth, onSave, onClose }) {
   const isEditing = Boolean(initialPet?.id);
+  const isOwner = currentUser && (
+    (initialPet?.ownerId && initialPet.ownerId === currentUser.uid) ||
+    (initialPet?.ownerEmail && currentUser.email && initialPet.ownerEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
+    (initialPet?.owner?.email && currentUser.email && initialPet.owner.email.toLowerCase() === currentUser.email.toLowerCase())
+  );
+  const canEdit = !isEditing || isOwner || isUserAdmin(currentUser);
+
+  if (isEditing && !canEdit) {
+    return (
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '36px 24px', maxWidth: '440px' }}>
+          <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#FEE2E2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <ShieldAlert size={30} color="#DC2626" />
+          </div>
+          <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#1C1917', marginBottom: '8px' }}>
+            Acceso no autorizado
+          </h3>
+          <p style={{ fontSize: '13.5px', color: '#78716C', lineHeight: 1.5, marginBottom: '22px' }}>
+            Esta mascota pertenece a otro usuario registrado. Solo su dueño o un administrador pueden editar sus datos.
+          </p>
+          <button onClick={onClose} className="btn-primary" style={{ padding: '10px 24px' }}>
+            Entendido
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const [isBreedPickerOpen, setIsBreedPickerOpen] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
 

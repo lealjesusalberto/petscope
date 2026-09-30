@@ -340,6 +340,7 @@ export default function App() {
         {currentView === 'profile' && selectedPet && (
           <PetProfileView
             pet={selectedPet}
+            currentUser={currentUser}
             onBack={() => setCurrentView('dashboard')}
             onOpenQr={(pet) => setQrModalPet(pet)}
             onEditPet={(pet) => setEditingPet(pet)}
