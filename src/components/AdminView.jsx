@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ShieldCheck, Users, Dog, AlertTriangle, Search, CheckCircle2,
-  ExternalLink, QrCode, ArrowLeft, RefreshCw, Sparkles, User, Key, Eye
+  ShieldCheck, ShieldAlert, Users, Dog, AlertTriangle, Search, CheckCircle2,
+  ExternalLink, QrCode, ArrowLeft, RefreshCw, Sparkles, User, Key, Eye, Lock
 } from 'lucide-react';
 import { fetchUsersList, updateUserRole } from '../firebase/petService';
+import { isUserAdmin } from '../firebase/authService';
 
 export default function AdminView({ pets, currentUser, onSelectPet, onOpenQr, onBack }) {
+  const isAdmin = isUserAdmin(currentUser);
   const [usersList, setUsersList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -13,6 +15,7 @@ export default function AdminView({ pets, currentUser, onSelectPet, onOpenQr, on
   const [roleUpdating, setRoleUpdating] = useState({});
 
   const loadUsers = async () => {
+    if (!isAdmin) return;
     setLoading(true);
     try {
       const users = await fetchUsersList();
@@ -25,8 +28,62 @@ export default function AdminView({ pets, currentUser, onSelectPet, onOpenQr, on
   };
 
   useEffect(() => {
-    loadUsers();
-  }, []);
+    if (isAdmin) {
+      loadUsers();
+    }
+  }, [isAdmin]);
+
+  // Security gate: Block unauthorized visitors immediately
+  if (!isAdmin) {
+    return (
+      <div style={{
+        maxWidth: '520px',
+        margin: '60px auto',
+        padding: '36px 24px',
+        background: '#FFFFFF',
+        borderRadius: '24px',
+        border: '1.5px solid #FEE2E2',
+        textAlign: 'center',
+        boxShadow: '0 12px 32px rgba(220, 38, 38, 0.08)'
+      }}>
+        <div style={{
+          width: '64px',
+          height: '64px',
+          borderRadius: '50%',
+          background: '#FEE2E2',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto 16px'
+        }}>
+          <Lock size={32} color="#DC2626" />
+        </div>
+        <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#1C1917', marginBottom: '8px' }}>
+          Acceso Restringido a Administradores
+        </h2>
+        <p style={{ fontSize: '14px', color: '#78716C', lineHeight: 1.5, marginBottom: '24px' }}>
+          {currentUser
+            ? `Tu cuenta (${currentUser.email}) no cuenta con privilegios de Administrador del sistema Q-pet.`
+            : 'Debes iniciar sesión con una cuenta autorizada de Administrador para acceder a este panel.'}
+        </p>
+        <button
+          onClick={onBack}
+          style={{
+            background: '#1C1917',
+            color: '#FFFFFF',
+            border: 'none',
+            borderRadius: '12px',
+            padding: '12px 24px',
+            fontSize: '14px',
+            fontWeight: 700,
+            cursor: 'pointer'
+          }}
+        >
+          Volver a Mis Mascotas
+        </button>
+      </div>
+    );
+  }
 
   // Filter users based on search
   const filteredUsers = usersList.filter((u) => {

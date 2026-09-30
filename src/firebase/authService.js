@@ -36,15 +36,22 @@ export function getAuthErrorMessage(errorCode) {
 }
 
 /**
+ * List of officially authorized Administrator emails
+ * You can add any administrator email here
+ */
+export const ADMIN_EMAILS = [
+  'lealjesusalberto@gmail.com',
+  'admin@qpet.com'
+];
+
+/**
  * Check if a user is an administrator
  */
 export function isUserAdmin(user) {
-  if (!user) return false;
-  return (
-    user.role === 'admin' ||
-    user.email?.toLowerCase().includes('admin') ||
-    user.email?.toLowerCase() === 'lealjesusalberto@gmail.com'
-  );
+  if (!user || !user.email) return false;
+  const userEmail = user.email.toLowerCase().trim();
+  const isConfiguredAdmin = ADMIN_EMAILS.some((email) => email.toLowerCase().trim() === userEmail);
+  return Boolean(user.role === 'admin' || isConfiguredAdmin);
 }
 
 /**
@@ -56,11 +63,10 @@ export async function syncUserToFirestore(authUser) {
     const userRef = doc(db, "users", authUser.uid);
     const snap = await getDoc(userRef);
 
-    const isAdmin =
-      authUser.email?.toLowerCase().includes("admin") ||
-      authUser.email?.toLowerCase() === "admin@qpet.com" ||
-      authUser.email?.toLowerCase() === "lealjesusalberto@gmail.com" ||
-      snap.data()?.role === "admin";
+    const userEmail = (authUser.email || "").toLowerCase().trim();
+    const isConfiguredAdmin = ADMIN_EMAILS.some((email) => email.toLowerCase().trim() === userEmail);
+    const hasAdminRoleInDb = snap.exists() && snap.data()?.role === "admin";
+    const isAdmin = Boolean(isConfiguredAdmin || hasAdminRoleInDb);
 
     const userData = {
       uid: authUser.uid,

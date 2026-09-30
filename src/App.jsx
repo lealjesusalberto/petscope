@@ -249,9 +249,20 @@ export default function App() {
     try {
       await logout();
       showToast('Sesión cerrada');
+      if (currentView === 'admin') {
+        setCurrentView('dashboard');
+      }
     } catch (err) {
       console.error('Error logging out:', err);
     }
+  };
+
+  const handleNavigate = (view) => {
+    if (view === 'admin' && !isUserAdmin(currentUser)) {
+      showToast('Acceso restringido: Solo el Administrador puede ingresar.');
+      return;
+    }
+    setCurrentView(view);
   };
 
   return (
@@ -285,7 +296,7 @@ export default function App() {
       {/* Top Navbar */}
       <Navbar
         currentView={currentView}
-        onNavigate={(view) => setCurrentView(view)}
+        onNavigate={handleNavigate}
         onOpenScanner={() => setIsScannerOpen(true)}
         onAddNewPet={handleStartAddNewPet}
         currentUser={currentUser}
