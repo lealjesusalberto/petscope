@@ -62,7 +62,16 @@ export default function App() {
           seedInitialPets().catch((err) => console.warn('Could not auto-seed Firestore:', err));
         } else if (firestorePets && firestorePets.length > 0) {
           setPets((prevPets) => {
-            const merged = [...firestorePets];
+            const merged = firestorePets.map((cloudPet) => {
+              const defaultMatch = INITIAL_PETS.find((p) => p.id === cloudPet.id);
+              return {
+                ...cloudPet,
+                birthDate: cloudPet.birthDate || defaultMatch?.birthDate || null,
+                vaccines: (Array.isArray(cloudPet.vaccines) && cloudPet.vaccines.length > 0)
+                  ? cloudPet.vaccines
+                  : (defaultMatch?.vaccines || [])
+              };
+            });
             // Keep any locally created pets that might not be in Firestore yet, and auto-sync them to the cloud
             prevPets.forEach((localPet) => {
               if (!merged.some((cloudPet) => cloudPet.id === localPet.id)) {
@@ -333,6 +342,7 @@ export default function App() {
             pet={selectedPet}
             onBack={() => setCurrentView('dashboard')}
             onOpenQr={(pet) => setQrModalPet(pet)}
+            onEditPet={(pet) => setEditingPet(pet)}
           />
         )}
 

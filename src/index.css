@@ -1310,18 +1310,18 @@ body {
 }
 
 .action-btn.edit-btn {
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  background: #FFFFFF;
-  color: var(--text-muted);
-  border: 1px solid var(--cream-border);
+  flex: 1 1 0%;
+  background: #FFFBEB;
+  color: #B45309;
+  border: 1.5px solid #FDE68A;
+  padding: 8px 10px;
 }
 
 .action-btn.edit-btn:hover {
-  border-color: var(--primary);
-  color: var(--primary-hover);
+  background: #FEF3C7;
+  border-color: #F59E0B;
+  color: #92400E;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
 }
 
 .empty-state-box {
@@ -2789,6 +2789,654 @@ button:active, .header-cta-btn:active, .action-btn:active {
   .computed-age-pill-placeholder {
     justify-content: center;
   }
+}
+
+/* ==========================================================================
+   VISTA PRINCIPAL / ONBOARDING - ANIMACIONES DINÁMICAS & HERO MOTION
+   ========================================================================== */
+
+@keyframes heroLevitate {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.015);
+  }
+}
+
+@keyframes haloPulseRotate {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(0.92);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(180deg) scale(1.12);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg) scale(0.92);
+    opacity: 0.5;
+  }
+}
+
+@keyframes floatBadgeLeft {
+  0%, 100% {
+    transform: translateY(0px) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+@keyframes floatBadgeRight {
+  0%, 100% {
+    transform: translateY(0px) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-1.5deg);
+  }
+}
+
+@keyframes livePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.15);
+    box-shadow: 0 0 0 5px rgba(220, 38, 38, 0);
+  }
+}
+
+@keyframes doodleWiggle {
+  0%, 100% {
+    transform: rotate(0deg) translate(0, 0);
+  }
+  25% {
+    transform: rotate(-3deg) translate(-1px, -2px);
+  }
+  75% {
+    transform: rotate(3deg) translate(1px, -1px);
+  }
+}
+
+@keyframes ctaGlowSweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes cardFloatIdle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes bubbleDrift {
+  0%, 100% {
+    transform: scale(1) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.08) translate(6px, -8px);
+  }
+}
+
+@keyframes viewEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* View transition utility */
+.view-enter-animation {
+  animation: viewEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Hero Puppy Levitating Wrapper */
+.hero-puppy-wrapper {
+  animation: heroLevitate 4.5s ease-in-out infinite;
+  position: relative;
+  z-index: 4;
+}
+
+.hero-puppy-img {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+
+.hero-puppy-wrapper:hover .hero-puppy-img {
+  transform: scale(1.04) rotate(0.5deg);
+  box-shadow: 0 20px 48px rgba(217, 119, 6, 0.45);
+}
+
+/* Ambient Radial Glow Halo */
+.hero-glow-halo {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(254, 243, 199, 0.85) 0%, rgba(245, 158, 11, 0.45) 50%, rgba(245, 158, 11, 0) 75%);
+  pointer-events: none;
+  z-index: 1;
+  animation: haloPulseRotate 8s linear infinite;
+  filter: blur(8px);
+}
+
+/* Floating Badges on Hero Visual */
+.hero-floating-pill {
+  position: absolute;
+  z-index: 6;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 9999px;
+  padding: 7px 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #1C1917;
+  cursor: default;
+  transition: transform 0.25s ease;
+}
+
+.pill-top-left {
+  top: 26px;
+  left: 18px;
+  animation: floatBadgeLeft 4s ease-in-out infinite;
+}
+
+.pill-bottom-right {
+  bottom: 50px;
+  right: 18px;
+  animation: floatBadgeRight 4.6s ease-in-out infinite 0.5s;
+}
+
+.live-dot-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #DC2626;
+  display: inline-block;
+  animation: livePulse 1.8s infinite ease-in-out;
+}
+
+/* Hero Collar Tag Badge overlay */
+.hero-collar-tag-badge {
+  position: absolute;
+  bottom: 12px;
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  border: 1.5px solid #F59E0B;
+  color: #92400E;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  z-index: 5;
+  animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Decorative Bubbles Motion */
+.decorative-bubble.bubble-1 {
+  animation: bubbleDrift 7s ease-in-out infinite;
+}
+
+.decorative-bubble.bubble-2 {
+  animation: bubbleDrift 9s ease-in-out infinite 1s;
+}
+
+.bubble-3 {
+  position: absolute;
+  top: 40%;
+  right: 15px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+  animation: bubbleDrift 6s ease-in-out infinite 2s;
+}
+
+/* Doodle arrow animated */
+.doodle-arrow svg {
+  animation: doodleWiggle 3.5s ease-in-out infinite;
+  transform-origin: top left;
+}
+
+/* Primary CTA Button with Shine Ray */
+.hero-cta-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-cta-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.28) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(25deg);
+  animation: ctaGlowSweep 4.5s infinite ease-in-out;
+  pointer-events: none;
+}
+
+.btn-pill-icon-circle {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-cta-btn:hover .btn-pill-icon-circle {
+  transform: translateX(3px) scale(1.08);
+}
+
+/* Floating bottom cards hover */
+.floating-info-card.card-gps {
+  animation: cardFloatIdle 4s ease-in-out infinite;
+}
+
+.floating-info-card.card-qr {
+  animation: cardFloatIdle 4.5s ease-in-out infinite 0.7s;
+}
+
+.floating-info-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 28px rgba(245, 158, 11, 0.15);
+}
+
+/* ==========================================================================
+   CARNET DE VACUNACIÓN & HISTORIAL MÉDICO (MODAL & PERFIL)
+   ========================================================================== */
+
+/* In-Modal Vaccine Manager */
+.vaccine-manager-box {
+  background: #F8FAFC;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 14px;
+  margin-top: 14px;
+}
+
+.vaccine-manager-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.add-vaccine-toggle-btn {
+  background: #ECFDF5;
+  color: #047857;
+  border: 1px solid #A7F3D0;
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.add-vaccine-toggle-btn:hover {
+  background: #D1FAE5;
+  transform: translateY(-1px);
+}
+
+.add-vaccine-inline-form {
+  background: #FFFFFF;
+  border: 1.5px solid #10B981;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.1);
+  animation: modalEntrance 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vaccine-preset-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.vaccine-preset-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.vaccine-preset-chip {
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 3px 9px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.vaccine-preset-chip:hover {
+  background: #E2E8F0;
+  color: #1E293B;
+  transform: translateY(-1px);
+}
+
+.vaccine-preset-chip.active {
+  background: #059669;
+  border-color: #047857;
+  color: #FFFFFF;
+}
+
+.btn-add-vaccine-save {
+  background: #059669;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 16px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-add-vaccine-save:hover:not(:disabled) {
+  background: #047857;
+  transform: translateY(-1px);
+}
+
+.btn-add-vaccine-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vaccine-empty-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748B;
+  background: #FFFFFF;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed #CBD5E1;
+}
+
+.vaccine-items-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vaccine-item-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.vaccine-item-card:hover {
+  border-color: #CBD5E1;
+  transform: translateX(2px);
+}
+
+.vac-left-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.vac-item-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vac-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1E293B;
+}
+
+.vac-meta-dates {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: #64748B;
+}
+
+.vac-next-tag {
+  background: #FEF3C7;
+  color: #92400E;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.vac-vet-tag {
+  color: #475569;
+  font-style: italic;
+}
+
+.vac-delete-btn {
+  background: #FEE2E2;
+  color: #DC2626;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.vac-delete-btn:hover {
+  background: #DC2626;
+  color: #FFFFFF;
+  transform: scale(1.08);
+}
+
+/* Profile View Vaccine Card & Badge */
+.birthdate-profile-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #FEF3C7;
+  color: #92400E;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 4px;
+  animation: popIn 0.3s ease;
+}
+
+.vaccine-history-profile-card {
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 20px;
+  padding: 18px 20px;
+  margin-top: 18px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  animation: fadeInUp 0.4s ease both;
+}
+
+.vaccine-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vaccine-icon-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #ECFDF5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vaccine-profile-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1C1917;
+  margin: 0;
+}
+
+.vaccine-profile-subtitle {
+  font-size: 11px;
+  color: #78716C;
+  margin: 2px 0 0;
+}
+
+.vaccine-count-badge {
+  background: #ECFDF5;
+  color: #047857;
+  border: 1px solid #A7F3D0;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 9999px;
+}
+
+.profile-vaccine-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-vaccine-item {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-left: 4px solid #10B981;
+  border-radius: 12px;
+  padding: 12px 14px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-vaccine-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.08);
+}
+
+.p-vac-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.p-vac-name-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.p-vac-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.p-vac-status-pill {
+  background: #DCFCE7;
+  color: #15803D;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.p-vac-details-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: #475569;
+}
+
+.p-vac-date, .p-vac-next-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.p-vac-next-date {
+  color: #B45309;
+  background: #FEF3C7;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.p-vac-vet-line {
+  font-size: 11px;
+  color: #64748B;
+  margin-top: 5px;
+}
+
+.profile-vaccine-empty {
+  text-align: center;
+  padding: 24px 16px;
+  background: #F8FAFC;
+  border-radius: 14px;
+  border: 1px dashed #CBD5E1;
+  color: #64748B;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
 }
 
 

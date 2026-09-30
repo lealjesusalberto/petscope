@@ -110,13 +110,36 @@ export default function OnboardingView({ onGetStarted, onExploreDemo }) {
             <div className="visual-top-amber">
               <div className="decorative-bubble bubble-1" />
               <div className="decorative-bubble bubble-2" />
+              <div className="decorative-bubble bubble-3" />
+
+              {/* Ambient Glow Halo behind puppy */}
+              <div className="hero-glow-halo" />
+
+              {/* Floating Live Badge Top Left */}
+              <div className="hero-floating-pill pill-top-left">
+                <span className="live-dot-pulse" />
+                <MapPin size={13} color="#DC2626" />
+                <span>GPS en Tiempo Real</span>
+              </div>
+
+              {/* Floating Medical & Vac Badge Right */}
+              <div className="hero-floating-pill pill-bottom-right">
+                <ShieldCheck size={14} color="#059669" />
+                <span>Vacunas & Microchip</span>
+              </div>
 
               <div className="hero-puppy-wrapper">
                 <img
                   src="/assets/puppy-hero.jpg"
-                  alt="Cachorro feliz"
+                  alt="Cachorro feliz con placa inteligente"
                   className="hero-puppy-img"
                 />
+
+                {/* Mini collar tag badge */}
+                <div className="hero-collar-tag-badge" title="Medalla QR Inteligente">
+                  <QrCode size={16} color="#B45309" />
+                  <span>Placa Activa</span>
+                </div>
               </div>
 
               {/* Wave SVG divider */}
@@ -130,7 +153,7 @@ export default function OnboardingView({ onGetStarted, onExploreDemo }) {
               </div>
             </div>
 
-            {/* Bottom mini preview on desktop */}
+            {/* Bottom preview cards */}
             <div className="visual-card-bottom">
               <div className="floating-info-card card-gps">
                 <div className="float-icon-pin">
@@ -148,7 +171,7 @@ export default function OnboardingView({ onGetStarted, onExploreDemo }) {
                 </div>
                 <div>
                   <div className="float-title">Medalla Inteligente</div>
-                  <div className="float-sub">Escaneable en segundos</div>
+                  <div className="float-sub">Escaneable con cualquier cámara</div>
                 </div>
               </div>
             </div>

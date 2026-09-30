@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { fetchUsersList, updateUserRole } from '../firebase/petService';
 import { isUserAdmin } from '../firebase/authService';
+import { calculateAgeFromBirthDate } from '../utils/ageCalculator';
 
 export default function AdminView({ pets, currentUser, onSelectPet, onOpenQr, onBack }) {
   const isAdmin = isUserAdmin(currentUser);
@@ -437,7 +438,7 @@ export default function AdminView({ pets, currentUser, onSelectPet, onOpenQr, on
                           {pet.name}
                         </div>
                         <div style={{ fontSize: '12px', color: '#78716C' }}>
-                          {pet.breed} • {pet.age} • Tel: {pet.owner?.phone}
+                          {pet.breed} • {pet.birthDate ? calculateAgeFromBirthDate(pet.birthDate) : pet.age} • Tel: {pet.owner?.phone}
                         </div>
                         <span style={{
                           fontSize: '11px',

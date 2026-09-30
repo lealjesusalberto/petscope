@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import {
   MapPin, Phone, MessageCircle, Navigation, ShieldCheck,
-  AlertTriangle, Heart, Award, ArrowLeft, QrCode, Share2, Check, Calendar
+  AlertTriangle, Heart, Award, ArrowLeft, QrCode, Share2, Check,
+  Calendar, Syringe, Clock, CheckCircle2, Sparkles, Edit3
 } from 'lucide-react';
 import { calculateAgeFromBirthDate, formatBirthDateDisplay } from '../utils/ageCalculator';
 
-export default function PetProfileView({ pet, onBack, onOpenQr }) {
+export default function PetProfileView({ pet, onBack, onOpenQr, onEditPet }) {
   const [gpsLoading, setGpsLoading] = useState(false);
   const [gpsSuccess, setGpsSuccess] = useState(false);
   const [gpsError, setGpsError] = useState(null);
@@ -77,7 +78,7 @@ export default function PetProfileView({ pet, onBack, onOpenQr }) {
   };
 
   return (
-    <div className="pet-profile-page">
+    <div className="pet-profile-page view-enter-animation">
       {/* Top Floating Action Bar */}
       <div className="profile-top-bar">
         <button
@@ -90,6 +91,17 @@ export default function PetProfileView({ pet, onBack, onOpenQr }) {
         </button>
 
         <div className="profile-actions-right">
+          {onEditPet && (
+            <button
+              onClick={() => onEditPet(pet)}
+              className="profile-circle-btn"
+              title="Editar datos de esta mascota"
+              style={{ background: '#FFFBEB', borderColor: '#FDE68A' }}
+            >
+              <Edit3 size={18} color="#D97706" />
+            </button>
+          )}
+
           <button
             onClick={handleCopyProfileLink}
             className="profile-circle-btn"
@@ -140,13 +152,36 @@ export default function PetProfileView({ pet, onBack, onOpenQr }) {
             <p className="desktop-qr-desc">
               Esta placa está vinculada a esta ficha de identificación.
             </p>
-            <button
-              onClick={() => onOpenQr(pet)}
-              className="btn-secondary"
-              style={{ padding: '8px 14px', fontSize: '13px' }}
-            >
-              <span>Ver Medalla para Collar</span>
-            </button>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => onOpenQr(pet)}
+                className="btn-secondary"
+                style={{ padding: '8px 14px', fontSize: '13px', flex: 1 }}
+              >
+                <span>Ver Medalla QR</span>
+              </button>
+
+              {onEditPet && (
+                <button
+                  onClick={() => onEditPet(pet)}
+                  className="btn-primary"
+                  style={{
+                    padding: '8px 14px',
+                    fontSize: '13px',
+                    flex: 1,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    background: '#D97706',
+                    borderColor: '#B45309'
+                  }}
+                >
+                  <Edit3 size={14} />
+                  <span>Editar Ficha</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -197,15 +232,16 @@ export default function PetProfileView({ pet, onBack, onOpenQr }) {
             </div>
           )}
 
-          {/* 3 Metric Pills: Edad, Sexo, Vacunado */}
+          {/* 3 Metric Pills: Edad con Fecha Nacimiento, Sexo, Vacunas */}
           <div className="metric-pills-row">
-            <div className="metric-pill-card">
+            <div className="metric-pill-card age-metric-pill-card">
               <span className="metric-pill-label">Edad</span>
-              <span className="metric-pill-value">{displayAge}</span>
+              <span className="metric-pill-value">{displayAge || 'No indicada'}</span>
               {pet.birthDate && (
-                <span style={{ fontSize: '11px', color: '#78716C', marginTop: '3px', fontWeight: 600 }}>
-                  {formatBirthDateDisplay(pet.birthDate)}
-                </span>
+                <div className="birthdate-profile-tag" title="Fecha de nacimiento">
+                  <Calendar size={11} color="#D97706" />
+                  <span>{formatBirthDateDisplay(pet.birthDate)}</span>
+                </div>
               )}
             </div>
 
@@ -215,9 +251,11 @@ export default function PetProfileView({ pet, onBack, onOpenQr }) {
             </div>
 
             <div className="metric-pill-card">
-              <span className="metric-pill-label">Vacunado</span>
-              <span className="metric-pill-value" style={{ color: '#059669' }}>
-                {pet.vaccinated.includes('Sí') ? 'Sí' : pet.vaccinated}
+              <span className="metric-pill-label">Vacunación</span>
+              <span className="metric-pill-value" style={{ color: '#059669', fontSize: '13px' }}>
+                {Array.isArray(pet.vaccines) && pet.vaccines.length > 0
+                  ? `${pet.vaccines.length} al día`
+                  : (pet.vaccinated.includes('Sí') ? 'Al día' : pet.vaccinated)}
               </span>
             </div>
           </div>
@@ -283,6 +321,75 @@ export default function PetProfileView({ pet, onBack, onOpenQr }) {
             <p className="section-body">
               {pet.about || 'Mascota muy cariñosa y dócil. Por favor comunícate con su familia si está perdida.'}
             </p>
+          </div>
+
+          {/* Historial de Vacunación & Médico (Carnet Digital) */}
+          <div className="vaccine-history-profile-card">
+            <div className="vaccine-history-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div className="vaccine-icon-badge">
+                  <Syringe size={18} color="#059669" />
+                </div>
+                <div>
+                  <h4 className="vaccine-profile-title">
+                    Historial de Vacunación & Salud
+                  </h4>
+                  <p className="vaccine-profile-subtitle">
+                    Carnet médico con fechas de dosis y próximos refuerzos
+                  </p>
+                </div>
+              </div>
+
+              {Array.isArray(pet.vaccines) && pet.vaccines.length > 0 && (
+                <span className="vaccine-count-badge">
+                  {pet.vaccines.length} {pet.vaccines.length === 1 ? 'vacuna' : 'vacunas'}
+                </span>
+              )}
+            </div>
+
+            {Array.isArray(pet.vaccines) && pet.vaccines.length > 0 ? (
+              <div className="profile-vaccine-list">
+                {pet.vaccines.map((vac) => (
+                  <div key={vac.id || vac.name} className="profile-vaccine-item">
+                    <div className="p-vac-top">
+                      <div className="p-vac-name-row">
+                        <CheckCircle2 size={15} color="#059669" className="p-vac-check" />
+                        <span className="p-vac-name">{vac.name}</span>
+                      </div>
+                      <span className="p-vac-status-pill">
+                        Aplicada ✓
+                      </span>
+                    </div>
+
+                    <div className="p-vac-details-row">
+                      <div className="p-vac-date">
+                        <Calendar size={12} color="#78716C" />
+                        <span>Fecha: <strong>{vac.date}</strong></span>
+                      </div>
+
+                      {vac.nextDue && (
+                        <div className="p-vac-next-date">
+                          <Clock size={12} color="#D97706" />
+                          <span>Próximo Refuerzo: <strong>{vac.nextDue}</strong></span>
+                        </div>
+                      )}
+                    </div>
+
+                    {vac.vet && (
+                      <div className="p-vac-vet-line">
+                        <span>🏥 Veterinario: {vac.vet}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="profile-vaccine-empty">
+                <Syringe size={22} color="#9CA3AF" />
+                <p>No hay vacunas detalladas registradas en esta ficha.</p>
+                <span>Estado general reportado: <strong>{pet.vaccinated || 'Al día'}</strong></span>
+              </div>
+            )}
           </div>
 
           {/* Medical & Special Care */}

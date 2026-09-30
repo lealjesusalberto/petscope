@@ -6,9 +6,36 @@ export const INITIAL_PETS = [
     name: 'Max',
     species: 'dog',
     breed: 'Golden Retriever',
+    birthDate: '2026-01-15',
     age: '8 meses',
     gender: 'Macho',
     vaccinated: 'Sí, al día',
+    vaccines: [
+      {
+        id: 'vac-max-1',
+        name: 'Puppy Séxtuple / DHPPI-L (1ra y 2da Dosis)',
+        date: '2026-03-20',
+        nextDue: '2027-03-20',
+        vet: 'Dra. Patricia Rivas • Vet Las Mercedes',
+        status: 'applied'
+      },
+      {
+        id: 'vac-max-2',
+        name: 'Antirrábica Anual',
+        date: '2026-05-18',
+        nextDue: '2027-05-18',
+        vet: 'Dra. Patricia Rivas • Vet Las Mercedes',
+        status: 'applied'
+      },
+      {
+        id: 'vac-max-3',
+        name: 'Desparasitación Interna (Simparica Trio)',
+        date: '2026-08-10',
+        nextDue: '2026-11-10',
+        vet: 'Dr. Alejandro Peña',
+        status: 'applied'
+      }
+    ],
     weight: '24 kg',
     color: 'Dorado / Crema',
     microchip: '982-0192-VE',
@@ -31,9 +58,36 @@ export const INITIAL_PETS = [
     name: 'Bruno',
     species: 'dog',
     breed: 'Bulldog Francés',
+    birthDate: '2023-05-10',
     age: '3 años',
     gender: 'Macho',
     vaccinated: 'Sí, al día',
+    vaccines: [
+      {
+        id: 'vac-bruno-1',
+        name: 'Antirrábica Rabdomun',
+        date: '2025-11-14',
+        nextDue: '2026-11-14',
+        vet: 'Dr. Carlos Suárez • Centro Canino Caracas',
+        status: 'applied'
+      },
+      {
+        id: 'vac-bruno-2',
+        name: 'Séxtuple Refuerzo Anual',
+        date: '2025-11-14',
+        nextDue: '2026-11-14',
+        vet: 'Dr. Carlos Suárez • Centro Canino Caracas',
+        status: 'applied'
+      },
+      {
+        id: 'vac-bruno-3',
+        name: 'Bordetella (Tos de las Perreras)',
+        date: '2026-02-05',
+        nextDue: '2027-02-05',
+        vet: 'Dra. Mónica Gil',
+        status: 'applied'
+      }
+    ],
     weight: '13 kg',
     color: 'Beige / Leonado',
     microchip: '612-8821-VE',
@@ -56,9 +110,36 @@ export const INITIAL_PETS = [
     name: 'Cleo',
     species: 'cat',
     breed: 'Siamés',
+    birthDate: '2024-06-20',
     age: '2 años',
     gender: 'Hembra',
     vaccinated: 'Sí, al día',
+    vaccines: [
+      {
+        id: 'vac-cleo-1',
+        name: 'Triple Felina (Panleucopenia, Calicivirus, Rinotraqueitis)',
+        date: '2026-04-12',
+        nextDue: '2027-04-12',
+        vet: 'Dra. Gabriela Torres • Felinos Vet',
+        status: 'applied'
+      },
+      {
+        id: 'vac-cleo-2',
+        name: 'Antirrábica Felina',
+        date: '2026-04-12',
+        nextDue: '2027-04-12',
+        vet: 'Dra. Gabriela Torres • Felinos Vet',
+        status: 'applied'
+      },
+      {
+        id: 'vac-cleo-3',
+        name: 'Leucemia Felina (FeLV)',
+        date: '2025-05-10',
+        nextDue: '2026-05-10',
+        vet: 'Dra. Gabriela Torres • Felinos Vet',
+        status: 'applied'
+      }
+    ],
     weight: '3.5 kg',
     color: 'Crema y Chocolate',
     microchip: '551-3094-VE',
@@ -81,9 +162,28 @@ export const INITIAL_PETS = [
     name: 'Mimi',
     species: 'cat',
     breed: 'Scottish Fold',
+    birthDate: '2025-08-12',
     age: '1 año',
     gender: 'Hembra',
     vaccinated: 'Sí, al día',
+    vaccines: [
+      {
+        id: 'vac-mimi-1',
+        name: 'Triple Felina FVRCP',
+        date: '2026-01-22',
+        nextDue: '2027-01-22',
+        vet: 'Clínica Veterinaria Los Palos Grandes',
+        status: 'applied'
+      },
+      {
+        id: 'vac-mimi-2',
+        name: 'Antirrábica Felina',
+        date: '2026-01-22',
+        nextDue: '2027-01-22',
+        vet: 'Clínica Veterinaria Los Palos Grandes',
+        status: 'applied'
+      }
+    ],
     weight: '3.8 kg',
     color: 'Arena / Beige',
     microchip: '883-9411-VE',
@@ -106,9 +206,36 @@ export const INITIAL_PETS = [
     name: 'Toby',
     species: 'dog',
     breed: 'Welsh Corgi',
+    birthDate: '2024-03-08',
     age: '2 años',
     gender: 'Macho',
     vaccinated: 'Sí, al día',
+    vaccines: [
+      {
+        id: 'vac-toby-1',
+        name: 'Séxtuple Canina Anual',
+        date: '2026-02-14',
+        nextDue: '2027-02-14',
+        vet: 'Hospital Veterinario Chacao',
+        status: 'applied'
+      },
+      {
+        id: 'vac-toby-2',
+        name: 'Antirrábica Imrab 3',
+        date: '2026-02-14',
+        nextDue: '2027-02-14',
+        vet: 'Hospital Veterinario Chacao',
+        status: 'applied'
+      },
+      {
+        id: 'vac-toby-3',
+        name: 'Desparasitación NexGard Spectra',
+        date: '2026-07-20',
+        nextDue: '2026-10-20',
+        vet: 'Hospital Veterinario Chacao',
+        status: 'applied'
+      }
+    ],
     weight: '12 kg',
     color: 'Marrón y Blanco',
     microchip: '442-1104-VE',
@@ -135,7 +262,29 @@ export function loadPets() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_PETS));
       return INITIAL_PETS;
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    let migrated = false;
+    const enriched = parsed.map((pet) => {
+      const defaultMatch = INITIAL_PETS.find((p) => p.id === pet.id);
+      let updated = { ...pet };
+
+      if (!updated.birthDate && defaultMatch?.birthDate) {
+        migrated = true;
+        updated.birthDate = defaultMatch.birthDate;
+      }
+      if ((!updated.vaccines || updated.vaccines.length === 0) && defaultMatch?.vaccines) {
+        migrated = true;
+        updated.vaccines = defaultMatch.vaccines;
+      } else if (!Array.isArray(updated.vaccines)) {
+        updated.vaccines = [];
+      }
+      return updated;
+    });
+
+    if (migrated) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(enriched));
+    }
+    return enriched;
   } catch (err) {
     console.error('Error reading pets from storage:', err);
     return INITIAL_PETS;

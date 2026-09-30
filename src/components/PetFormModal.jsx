@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
-import { X, Upload, Check, AlertCircle, Sparkles, Heart, Phone, ShieldCheck, ChevronRight, Dog, Cat, Calendar } from 'lucide-react';
+import {
+  X, Upload, Check, AlertCircle, Sparkles, Heart, Phone, ShieldCheck,
+  ChevronRight, Dog, Cat, Calendar, Syringe, Plus, Trash2, CheckCircle2, Clock
+} from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DOG_BREEDS, CAT_BREEDS, DOG_BREEDS_CATALOG, CAT_BREEDS_CATALOG } from '../data/breedsData';
+import { INITIAL_PETS } from '../data/petsData';
 import BreedPickerModal from './BreedPickerModal';
 import { calculateAgeFromBirthDate } from '../utils/ageCalculator';
 
@@ -76,15 +80,22 @@ export default function PetFormModal({ initialPet, currentUser, onRequireAuth, o
   const [isBreedPickerOpen, setIsBreedPickerOpen] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
 
+  const defaultPetMatch = INITIAL_PETS.find((p) => p.id === initialPet?.id);
+  const initialBirthDate = initialPet?.birthDate || defaultPetMatch?.birthDate || '';
+  const initialVaccines = (Array.isArray(initialPet?.vaccines) && initialPet.vaccines.length > 0)
+    ? initialPet.vaccines
+    : (defaultPetMatch?.vaccines || []);
+
   const [formData, setFormData] = useState({
     id: initialPet?.id || `pet-${Date.now()}`,
     name: initialPet?.name || '',
     species: initialPet?.species || 'dog',
     breed: initialPet?.breed || '',
-    birthDate: initialPet?.birthDate || '',
-    age: initialPet?.birthDate ? calculateAgeFromBirthDate(initialPet.birthDate) : (initialPet?.age || ''),
+    birthDate: initialBirthDate,
+    age: initialBirthDate ? calculateAgeFromBirthDate(initialBirthDate) : (initialPet?.age || ''),
     gender: initialPet?.gender || 'Macho',
     vaccinated: initialPet?.vaccinated || 'Sí, al día',
+    vaccines: initialVaccines,
     weight: initialPet?.weight || '',
     color: initialPet?.color || '',
     microchip: initialPet?.microchip || '',
@@ -125,13 +136,48 @@ export default function PetFormModal({ initialPet, currentUser, onRequireAuth, o
     }
   };
 
+  const [showAddVaccine, setShowAddVaccine] = useState(false);
+  const [newVacName, setNewVacName] = useState('');
+  const [newVacDate, setNewVacDate] = useState(new Date().toISOString().split('T')[0]);
+  const [newVacNextDue, setNewVacNextDue] = useState('');
+  const [newVacVet, setNewVacVet] = useState('');
+
   const handleBirthDateChange = (e) => {
     const bDate = e.target.value;
     const computedAge = calculateAgeFromBirthDate(bDate);
     setFormData(prev => ({
       ...prev,
       birthDate: bDate,
-      age: computedAge || prev.age
+      age: computedAge || ''
+    }));
+  };
+
+  const handleAddVaccine = (e) => {
+    if (e) e.preventDefault();
+    if (!newVacName.trim()) return;
+    const newEntry = {
+      id: `vac-${Date.now()}`,
+      name: newVacName.trim(),
+      date: newVacDate || new Date().toISOString().split('T')[0],
+      nextDue: newVacNextDue || '',
+      vet: newVacVet.trim() || '',
+      status: 'applied'
+    };
+    setFormData(prev => ({
+      ...prev,
+      vaccines: [...(prev.vaccines || []), newEntry],
+      vaccinated: 'Sí, al día'
+    }));
+    setNewVacName('');
+    setNewVacNextDue('');
+    setNewVacVet('');
+    setShowAddVaccine(false);
+  };
+
+  const handleRemoveVaccine = (vacId) => {
+    setFormData(prev => ({
+      ...prev,
+      vaccines: (prev.vaccines || []).filter(v => v.id !== vacId)
     }));
   };
 
@@ -206,9 +252,14 @@ export default function PetFormModal({ initialPet, currentUser, onRequireAuth, o
       prettyAlt = `+${rawAlt}`;
     }
 
+    const computedAge = formData.birthDate ? calculateAgeFromBirthDate(formData.birthDate) : (formData.age || '');
+
     const updatedPet = {
       ...formData,
       breed: formData.breed || (formData.species === 'dog' ? 'Siberian Husky' : 'Mestizo / Común'),
+      birthDate: formData.birthDate || null,
+      age: computedAge || formData.age || 'Edad no especificada',
+      vaccines: Array.isArray(formData.vaccines) ? formData.vaccines : [],
       ownerId: formData.ownerId || currentUser?.uid || null,
       ownerEmail: formData.ownerEmail || currentUser?.email || '',
       owner: {
@@ -546,7 +597,160 @@ export default function PetFormModal({ initialPet, currentUser, onRequireAuth, o
               </div>
             </div>
 
-            <div className="form-group" style={{ marginBottom: 0 }}>
+            {/* Historial de Vacunación Interactivo - SIEMPRE VISIBLE */}
+            <div className="vaccine-manager-box" style={{ background: '#FFFFFF', border: '1.5px solid #10B981', padding: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', borderBottom: '1px solid #E2E8F0', paddingBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Syringe size={18} color="#059669" />
+                  <span style={{ fontWeight: 800, fontSize: '14px', color: '#065F46' }}>
+                    Registrar Vacunas con Fechas
+                  </span>
+                </div>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: '#047857', background: '#D1FAE5', padding: '3px 10px', borderRadius: '8px' }}>
+                  {formData.vaccines?.length || 0} registrada(s)
+                </span>
+              </div>
+
+              {/* Sugerencias Rápidas de Vacunas */}
+              <div style={{ marginBottom: '12px' }}>
+                <div style={{ fontSize: '11px', color: '#475569', fontWeight: 700, marginBottom: '6px' }}>
+                  Sugerencias rápidas (toca una para autocompletar el nombre):
+                </div>
+                <div className="vaccine-preset-pills">
+                  {(formData.species === 'dog'
+                    ? ['Antirrábica', 'Séxtuple / DHPPI-L', 'Parvovirus', 'Bordetella', 'Desparasitación Interna', 'Desparasitación Externa']
+                    : ['Triple Felina', 'Antirrábica Felina', 'Leucemia (FeLV)', 'Desparasitación Interna', 'Pipeta Externa']
+                  ).map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setNewVacName(preset)}
+                      className={`vaccine-preset-chip ${newVacName === preset ? 'active' : ''}`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Campos de Entrada Directos: Nombre, Fecha Aplicación, Próximo Refuerzo, Veterinario */}
+              <div className="form-row">
+                <div className="form-group" style={{ flex: 1.5 }}>
+                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, color: '#1E293B' }}>
+                    Nombre de la Vacuna / Dosis *
+                  </label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Ej. Antirrábica, Séxtuple, Parvovirus..."
+                    value={newVacName}
+                    onChange={(e) => setNewVacName(e.target.value)}
+                    style={{ fontSize: '13px' }}
+                  />
+                </div>
+
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, color: '#1E293B' }}>
+                    Fecha de Aplicación *
+                  </label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={newVacDate}
+                    onChange={(e) => setNewVacDate(e.target.value)}
+                    max={new Date().toISOString().split('T')[0]}
+                    style={{ fontSize: '13px' }}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, color: '#1E293B' }}>
+                    Próximo Refuerzo (Opcional)
+                  </label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={newVacNextDue}
+                    onChange={(e) => setNewVacNextDue(e.target.value)}
+                    style={{ fontSize: '13px' }}
+                  />
+                </div>
+
+                <div className="form-group" style={{ flex: 1.3 }}>
+                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, color: '#1E293B' }}>
+                    Clínica o Veterinario (Opcional)
+                  </label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Ej. Dra. Martínez • Vet Caracas"
+                    value={newVacVet}
+                    onChange={(e) => setNewVacVet(e.target.value)}
+                    style={{ fontSize: '13px' }}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleAddVaccine}
+                disabled={!newVacName.trim()}
+                className="btn-add-vaccine-save"
+                style={{ width: '100%', justifyContent: 'center', padding: '10px 16px', fontSize: '13px', marginTop: '4px' }}
+              >
+                <Plus size={16} />
+                <span>+ Agregar Esta Vacuna al Carnet</span>
+              </button>
+
+              {/* Lista de vacunas registradas en la mascota */}
+              <div style={{ marginTop: '16px', borderTop: '1.5px solid #F1F5F9', paddingTop: '12px' }}>
+                <div style={{ fontSize: '12px', fontWeight: 800, color: '#334155', marginBottom: '8px' }}>
+                  Vacunas registradas en esta ficha:
+                </div>
+
+                {(!formData.vaccines || formData.vaccines.length === 0) ? (
+                  <div className="vaccine-empty-hint">
+                    <Syringe size={16} color="#A8A29E" />
+                    <span>Aún no has agregado vacunas. Escribe el nombre y fecha arriba y presiona "+ Agregar Esta Vacuna al Carnet".</span>
+                  </div>
+                ) : (
+                  <div className="vaccine-items-stack">
+                    {formData.vaccines.map((vac) => (
+                      <div key={vac.id} className="vaccine-item-card">
+                        <div className="vac-left-info">
+                          <div className="vac-item-badge">
+                            <CheckCircle2 size={14} color="#059669" />
+                            <span className="vac-name">{vac.name}</span>
+                          </div>
+                          <div className="vac-meta-dates">
+                            <span title="Fecha de aplicación">📅 Aplicada: <strong>{vac.date}</strong></span>
+                            {vac.nextDue && (
+                              <span className="vac-next-tag" title="Próximo refuerzo programado">
+                                ⏳ Refuerzo: {vac.nextDue}
+                              </span>
+                            )}
+                            {vac.vet && <span className="vac-vet-tag">🏥 {vac.vet}</span>}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveVaccine(vac.id)}
+                          className="vac-delete-btn"
+                          title="Eliminar esta vacuna"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="form-group" style={{ marginBottom: 0, marginTop: '12px' }}>
               <label className="form-label">Alergias o Cuidados Médicos</label>
               <textarea
                 className="form-textarea"

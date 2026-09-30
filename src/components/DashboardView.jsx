@@ -370,16 +370,14 @@ export default function DashboardView({
                   <span className="btn-label">Ver Perfil</span>
                 </button>
 
-                {canManage && (
-                  <button
-                    onClick={() => onEditPet(pet)}
-                    className="action-btn edit-btn"
-                    title="Editar información (Solo dueño/admin)"
-                  >
-                    <Edit3 size={15} />
-                    <span className="btn-label">Editar</span>
-                  </button>
-                )}
+                <button
+                  onClick={() => onEditPet(pet)}
+                  className="action-btn edit-btn"
+                  title="Editar información de la mascota"
+                >
+                  <Edit3 size={15} />
+                  <span className="btn-label">Editar</span>
+                </button>
               </div>
             </div>
           );
