@@ -66,13 +66,16 @@ export async function syncUserToFirestore(authUser) {
     const isUidAdmin = ADMIN_UIDS.includes(authUser.uid);
     const hasAdminRoleInDb = snap.exists() && snap.data()?.role === "admin";
     const isAdmin = Boolean(isUidAdmin || hasAdminRoleInDb);
+    const existingData = snap.exists() ? snap.data() : {};
 
     const userData = {
       uid: authUser.uid,
       email: authUser.email || "",
-      displayName: authUser.displayName || authUser.email?.split("@")[0] || "Usuario",
-      photoURL: authUser.photoURL || null,
-      role: snap.exists() ? (snap.data().role || (isAdmin ? "admin" : "user")) : (isAdmin ? "admin" : "user"),
+      displayName: authUser.displayName || existingData.displayName || authUser.email?.split("@")[0] || "Usuario",
+      photoURL: existingData.photoURL || authUser.photoURL || null,
+      phone: existingData.phone || "",
+      address: existingData.address || "",
+      role: snap.exists() ? (existingData.role || (isAdmin ? "admin" : "user")) : (isAdmin ? "admin" : "user"),
       lastLogin: new Date().toISOString()
     };
 
@@ -232,27 +235,46 @@ export function subscribeToAuth(callback) {
 export async function updateUserProfile({ displayName, photoURL, phone, address }) {
   if (!auth.currentUser) throw new Error("No hay usuario autenticado.");
 
-  // 1. Update Firebase Auth Profile
+  // 1. Update Firebase Auth Profile with supported fields only
   const authUpdates = {};
   if (displayName !== undefined && displayName !== null) {
     authUpdates.displayName = displayName.trim();
   }
-  if (photoURL !== undefined) {
+
+  // Firebase Auth strictly enforces photoURL length <= 2048 characters (URL only, no base64)
+  // If it's a web URL (e.g. Google photo or CDN URL), update Firebase Auth profile
+  const isWebUrl = typeof photoURL === 'string' &&
+    (photoURL.startsWith('http://') || photoURL.startsWith('https://')) &&
+    photoURL.length < 2040;
+
+  if (isWebUrl) {
     authUpdates.photoURL = photoURL;
   }
+
   if (Object.keys(authUpdates).length > 0) {
-    await updateProfile(auth.currentUser, authUpdates);
+    try {
+      await updateProfile(auth.currentUser, authUpdates);
+    } catch (authErr) {
+      console.warn("Could not update Firebase Auth profile attributes:", authErr);
+    }
   }
 
-  // 2. Update Firestore user document
+  // 2. Update Firestore user document (Firestore supports base64 image strings up to 1MB!)
   const userRef = doc(db, "users", auth.currentUser.uid);
   const extraData = {
-    displayName: auth.currentUser.displayName || "",
-    photoURL: auth.currentUser.photoURL || null,
+    displayName: displayName !== undefined && displayName !== null ? displayName.trim() : (auth.currentUser.displayName || ""),
     updatedAt: new Date().toISOString()
   };
-  if (phone !== undefined) extraData.phone = phone.trim();
-  if (address !== undefined) extraData.address = address.trim();
+
+  if (photoURL !== undefined) {
+    extraData.photoURL = photoURL; // Base64 or URL stored cleanly in Firestore
+  }
+  if (phone !== undefined) {
+    extraData.phone = phone.trim();
+  }
+  if (address !== undefined) {
+    extraData.address = address.trim();
+  }
 
   try {
     await setDoc(userRef, extraData, { merge: true });
@@ -262,10 +284,10 @@ export async function updateUserProfile({ displayName, photoURL, phone, address 
 
   const updatedUserObj = {
     ...auth.currentUser,
-    displayName: auth.currentUser.displayName,
-    photoURL: auth.currentUser.photoURL,
-    phone: extraData.phone,
-    address: extraData.address,
+    displayName: extraData.displayName,
+    photoURL: photoURL !== undefined ? photoURL : (auth.currentUser.photoURL || null),
+    phone: extraData.phone || '',
+    address: extraData.address || '',
     role: isUserAdmin(auth.currentUser) ? 'admin' : 'user'
   };
 

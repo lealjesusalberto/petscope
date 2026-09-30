@@ -94,7 +94,7 @@ export default function UserProfileView({
 
     try {
       setIsCompressingPhoto(true);
-      const compressedDataUrl = await compressImageFile(file, 400, 0.85);
+      const compressedDataUrl = await compressImageFile(file, 320, 0.82);
       setFormData((prev) => ({ ...prev, photoURL: compressedDataUrl }));
       setIsEditing(true);
       if (showToast) {
