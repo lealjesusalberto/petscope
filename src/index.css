@@ -3787,5 +3787,180 @@ button:active, .header-cta-btn:active, .action-btn:active {
   transform: scale(0.97);
 }
 
+/* ==========================================================================
+   Compact Fit Layout for User Profile & Avatar Editor
+   ========================================================================== */
+
+.profile-fit-container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 12px 16px 85px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.profile-fit-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+@media (min-width: 920px) {
+  .profile-fit-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+}
+
+/* Tab Bar on Mobile */
+.profile-mobile-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #F5EFE6;
+  padding: 4px;
+  border-radius: 9999px;
+  margin-bottom: 14px;
+}
+
+@media (min-width: 920px) {
+  .profile-mobile-tabs {
+    display: none;
+  }
+}
+
+.profile-mobile-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #78716C;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-mobile-tab-btn.active {
+  background: #FFFFFF;
+  color: #1C1917;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* User Card */
+.profile-user-card {
+  background: #FFFFFF;
+  border: 1.5px solid #F0ECE1;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+}
+
+.profile-avatar-wrapper {
+  position: relative;
+  width: 82px;
+  height: 82px;
+  margin: 0 auto 12px;
+}
+
+.profile-avatar-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFA800 0%, #EA580C 100%);
+  border: 3.5px solid #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 28px;
+  font-weight: 800;
+  box-shadow: 0 6px 20px rgba(245, 124, 0, 0.28);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-avatar-circle:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 24px rgba(245, 124, 0, 0.38);
+}
+
+.profile-avatar-camera-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #1C1917;
+  color: #FFFFFF;
+  border: 2.5px solid #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.profile-avatar-camera-badge:hover {
+  transform: scale(1.12);
+  background: #EA580C;
+}
+
+/* Pets List Box */
+.profile-pets-box {
+  background: #FFFFFF;
+  border: 1.5px solid #F0ECE1;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-pets-scroll {
+  overflow-y: auto;
+  max-height: calc(100vh - 240px);
+  padding-right: 4px;
+}
+
+@media (max-width: 919px) {
+  .profile-pets-scroll {
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
+.profile-input-field {
+  width: 100%;
+  background: #FDFBF7;
+  border: 1.5px solid #EFEAE1;
+  border-radius: 12px;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: #1C1917;
+  outline: none;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.profile-input-field:focus {
+  border-color: #FFA800;
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(255, 168, 0, 0.15);
+}
+
+
 
 

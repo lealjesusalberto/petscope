@@ -143,9 +143,72 @@ export function subscribeToAuth(callback) {
     if (user) {
       const profile = await syncUserToFirestore(user);
       user.role = profile?.role || (isUserAdmin(user) ? "admin" : "user");
+      user.phone = profile?.phone || "";
+      user.address = profile?.address || "";
       callback(user);
     } else {
       callback(null);
     }
   });
 }
+
+/**
+ * Update authenticated user's profile and save extra metadata to Firestore
+ */
+export async function updateUserProfile({ displayName, photoURL, phone, address }) {
+  if (!auth.currentUser) throw new Error("No hay usuario autenticado.");
+
+  // 1. Update Firebase Auth Profile
+  const authUpdates = {};
+  if (displayName !== undefined && displayName !== null) {
+    authUpdates.displayName = displayName.trim();
+  }
+  if (photoURL !== undefined) {
+    authUpdates.photoURL = photoURL;
+  }
+  if (Object.keys(authUpdates).length > 0) {
+    await updateProfile(auth.currentUser, authUpdates);
+  }
+
+  // 2. Update Firestore user document
+  const userRef = doc(db, "users", auth.currentUser.uid);
+  const extraData = {
+    displayName: auth.currentUser.displayName || "",
+    photoURL: auth.currentUser.photoURL || null,
+    updatedAt: new Date().toISOString()
+  };
+  if (phone !== undefined) extraData.phone = phone.trim();
+  if (address !== undefined) extraData.address = address.trim();
+
+  try {
+    await setDoc(userRef, extraData, { merge: true });
+  } catch (err) {
+    console.warn("Could not persist extra profile fields to Firestore:", err);
+  }
+
+  return {
+    ...auth.currentUser,
+    displayName: auth.currentUser.displayName,
+    photoURL: auth.currentUser.photoURL,
+    phone: extraData.phone,
+    address: extraData.address
+  };
+}
+
+/**
+ * Fetch extended profile fields from Firestore for a given user UID
+ */
+export async function fetchUserFirestoreData(uid) {
+  if (!uid) return null;
+  try {
+    const userRef = doc(db, "users", uid);
+    const snap = await getDoc(userRef);
+    if (snap.exists()) {
+      return snap.data();
+    }
+  } catch (err) {
+    console.warn("Could not fetch user document:", err);
+  }
+  return null;
+}
+

@@ -375,6 +375,11 @@ export default function App() {
             onLogout={handleLogout}
             onNavigate={handleNavigate}
             onToggleStatus={handleToggleStatus}
+            onUserUpdated={(updatedUser) => {
+              setCurrentUser((prev) => ({ ...prev, ...updatedUser }));
+              showToast('¡Perfil actualizado con éxito!');
+            }}
+            showToast={showToast}
           />
         )}
       </main>
