@@ -76,26 +76,37 @@ export default function DashboardView({
           </div>
         </div>
 
-        {/* Quick Stats Pill */}
+        {/* Quick Stats Pill (Occupies 100% width on mobile) */}
         <div className="dashboard-stats-strip">
-          {currentUser && (
+          <div className="dashboard-stats-pills-row">
             <div className="stat-pill" style={{ background: '#FEF3C7', color: '#92400E' }}>
               <UserCheck size={12} />
-              <span className="stat-num">{myPets.length}</span>
+              <span className="stat-num">{currentUser ? myPets.length : 0}</span>
               <span className="stat-label">Tuyas</span>
             </div>
-          )}
-          <div className="stat-pill">
-            <span className="stat-num">{pets.length}</span>
-            <span className="stat-label">Total</span>
-          </div>
-          {lostCount > 0 && (
-            <div className="stat-pill lost-alert">
-              <ShieldAlert size={12} />
-              <span className="stat-num">{lostCount}</span>
-              <span className="stat-label">Extraviado</span>
+
+            <div className="stat-pill">
+              <span className="stat-num">{pets.length}</span>
+              <span className="stat-label">Total</span>
             </div>
-          )}
+
+            <div className={`stat-pill ${lostCount > 0 ? 'lost-alert' : 'safe-pill'}`}>
+              {lostCount > 0 ? (
+                <>
+                  <ShieldAlert size={12} />
+                  <span className="stat-num">{lostCount}</span>
+                  <span className="stat-label">Extraviado</span>
+                </>
+              ) : (
+                <>
+                  <ShieldCheck size={12} color="#059669" />
+                  <span className="stat-num">0</span>
+                  <span className="stat-label">Alertas</span>
+                </>
+              )}
+            </div>
+          </div>
+
           <button className="btn-add-desktop" onClick={onAddNewPet}>
             <Plus size={18} strokeWidth={2.8} />
             <span>Nueva Placa QR</span>
