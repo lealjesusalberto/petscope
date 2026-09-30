@@ -4,6 +4,7 @@ import {
   ShieldCheck, MapPin, Sparkles, Filter, CheckCircle2, Heart,
   UserCheck, Users
 } from 'lucide-react';
+import { isUserAdmin } from '../firebase/authService';
 
 export default function DashboardView({
   pets,
@@ -19,13 +20,8 @@ export default function DashboardView({
   const [ownershipFilter, setOwnershipFilter] = useState('all'); // all | mine
 
   const isPetMine = (pet) => {
-    if (!currentUser) return false;
-    const uidMatch = pet.ownerId && pet.ownerId === currentUser.uid;
-    const emailMatch = (
-      (pet.ownerEmail && currentUser.email && pet.ownerEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
-      (pet.owner?.email && currentUser.email && pet.owner.email.toLowerCase() === currentUser.email.toLowerCase())
-    );
-    return Boolean(uidMatch || emailMatch);
+    if (!currentUser || !currentUser.uid) return false;
+    return Boolean(pet.ownerId && pet.ownerId === currentUser.uid);
   };
 
   const myPets = pets.filter(isPetMine);
@@ -242,9 +238,7 @@ export default function DashboardView({
       <div className="pets-grid">
         {filteredPets.map((pet) => {
           const isMine = isPetMine(pet);
-          const isAdmin = currentUser?.role === 'admin' ||
-            currentUser?.email?.toLowerCase().includes('admin') ||
-            currentUser?.email === 'lealjesusalberto@gmail.com';
+          const isAdmin = isUserAdmin(currentUser);
           const canManage = Boolean(isMine || isAdmin);
 
           return (

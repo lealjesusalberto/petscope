@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { QrCode, Plus, Sparkles, Home, User, LogOut, CheckCircle, ShieldCheck } from 'lucide-react';
+import { QrCode, Plus, Sparkles, Home, User, LogOut, CheckCircle, ShieldCheck, Copy } from 'lucide-react';
 import { isUserAdmin } from '../firebase/authService';
 
 export default function Navbar({
@@ -143,12 +143,50 @@ export default function Navbar({
                     fontSize: '11px',
                     color: '#059669',
                     fontWeight: 700,
-                    marginBottom: '10px',
+                    marginBottom: '8px',
                     paddingBottom: '8px',
                     borderBottom: '1px solid #F5EFE6'
                   }}>
                     <CheckCircle size={13} />
                     <span>Conectado a Firebase</span>
+                  </div>
+
+                  {/* User UID badge */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    background: '#FBF9F5',
+                    border: '1px solid #EFEAE1',
+                    borderRadius: '8px',
+                    padding: '4px 8px',
+                    marginBottom: '10px'
+                  }}>
+                    <div style={{ fontSize: '10px', color: '#78716C', fontFamily: 'monospace', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      UID: {currentUser.uid}
+                    </div>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard?.writeText(currentUser.uid);
+                        alert('¡UID copiado al portapapeles!');
+                      }}
+                      title="Copiar mi UID de Firebase"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: '2px',
+                        cursor: 'pointer',
+                        color: '#D97706',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '2px',
+                        fontSize: '10px',
+                        fontWeight: 700
+                      }}
+                    >
+                      <Copy size={11} />
+                      <span>Copiar</span>
+                    </button>
                   </div>
 
                   {isAdmin && (

@@ -36,26 +36,26 @@ export function getAuthErrorMessage(errorCode) {
 }
 
 /**
- * List of officially authorized Administrator emails
- * You can add any administrator email here
+ * List of officially authorized Administrator UIDs (configured via .env or VITE_ADMIN_UIDS)
+ * Example in .env.local: VITE_ADMIN_UIDS=uid1,uid2
  */
-export const ADMIN_EMAILS = [
-  'lealjesusalberto@gmail.com',
-  'admin@qpet.com'
-];
+export const ADMIN_UIDS = (import.meta.env.VITE_ADMIN_UIDS || "")
+  .split(",")
+  .map((id) => id.trim())
+  .filter(Boolean);
 
 /**
- * Check if a user is an administrator
+ * Check if a user is an administrator based on verified UID or Firestore role
  */
 export function isUserAdmin(user) {
-  if (!user || !user.email) return false;
-  const userEmail = user.email.toLowerCase().trim();
-  const isConfiguredAdmin = ADMIN_EMAILS.some((email) => email.toLowerCase().trim() === userEmail);
-  return Boolean(user.role === 'admin' || isConfiguredAdmin);
+  if (!user || !user.uid) return false;
+  const isUidAdmin = ADMIN_UIDS.includes(user.uid);
+  return Boolean(user.role === 'admin' || isUidAdmin);
 }
 
 /**
  * Sync user profile to 'users' collection in Firestore with roles
+ * All records and permissions are strictly keyed by UID
  */
 export async function syncUserToFirestore(authUser) {
   if (!authUser) return null;
@@ -63,10 +63,9 @@ export async function syncUserToFirestore(authUser) {
     const userRef = doc(db, "users", authUser.uid);
     const snap = await getDoc(userRef);
 
-    const userEmail = (authUser.email || "").toLowerCase().trim();
-    const isConfiguredAdmin = ADMIN_EMAILS.some((email) => email.toLowerCase().trim() === userEmail);
+    const isUidAdmin = ADMIN_UIDS.includes(authUser.uid);
     const hasAdminRoleInDb = snap.exists() && snap.data()?.role === "admin";
-    const isAdmin = Boolean(isConfiguredAdmin || hasAdminRoleInDb);
+    const isAdmin = Boolean(isUidAdmin || hasAdminRoleInDb);
 
     const userData = {
       uid: authUser.uid,

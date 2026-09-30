@@ -13,9 +13,9 @@ service cloud.firestore {
     }
 
     // Función auxiliar: verifica si el usuario tiene rol de Administrador
+    // Basado 100% en UID y documento privado en Firestore (Cero correos expuestos)
     function isAdmin() {
       return isSignedIn() && (
-        request.auth.token.email in ['lealjesusalberto@gmail.com', 'admin@qpet.com'] ||
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
       );
     }
@@ -36,22 +36,18 @@ service cloud.firestore {
       );
 
       // 3. MODIFICACIÓN Y EDICIÓN PROTEGIDA (Evita hackeos por consola):
-      // SOLO el dueño legítimo de la mascota (comprobado por request.auth.uid)
+      // SOLO el dueño legítimo de la mascota (comprobado estrictamente por request.auth.uid)
       // o un Administrador del sistema pueden alterar o actualizar los datos.
       // Quien intente updateDoc() desde DevTools recibirá 'permission-denied'.
       allow update: if isSignedIn() && (
         resource.data.ownerId == request.auth.uid ||
-        request.auth.token.email == resource.data.ownerEmail ||
-        request.auth.token.email == resource.data.owner.email ||
         isAdmin()
       );
 
       // 4. ELIMINACIÓN PROTEGIDA:
-      // Solo el dueño o el admin pueden borrar la placa.
+      // Solo el dueño (por UID) o el admin pueden borrar la placa.
       allow delete: if isSignedIn() && (
         resource.data.ownerId == request.auth.uid ||
-        request.auth.token.email == resource.data.ownerEmail ||
-        request.auth.token.email == resource.data.owner.email ||
         isAdmin()
       );
     }
