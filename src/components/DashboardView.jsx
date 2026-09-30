@@ -242,6 +242,11 @@ export default function DashboardView({
       <div className="pets-grid">
         {filteredPets.map((pet) => {
           const isMine = isPetMine(pet);
+          const isAdmin = currentUser?.role === 'admin' ||
+            currentUser?.email?.toLowerCase().includes('admin') ||
+            currentUser?.email === 'lealjesusalberto@gmail.com';
+          const canManage = Boolean(isMine || isAdmin);
+
           return (
             <div
               key={pet.id}
@@ -298,23 +303,43 @@ export default function DashboardView({
                       {pet.name}
                     </h3>
 
-                    <button
-                      onClick={() => onToggleStatus(pet.id)}
-                      className={`status-toggle-btn ${pet.status === 'lost' ? 'lost' : 'safe'}`}
-                      title="Alternar estado de alerta"
-                    >
-                      {pet.status === 'lost' ? (
-                        <>
-                          <ShieldAlert size={12} />
-                          <span>¡Extraviado!</span>
-                        </>
-                      ) : (
-                        <>
-                          <ShieldCheck size={12} />
-                          <span>A Salvo</span>
-                        </>
-                      )}
-                    </button>
+                    {canManage ? (
+                      <button
+                        onClick={() => onToggleStatus(pet.id)}
+                        className={`status-toggle-btn ${pet.status === 'lost' ? 'lost' : 'safe'}`}
+                        title="Alternar estado de alerta (Solo dueño/admin)"
+                      >
+                        {pet.status === 'lost' ? (
+                          <>
+                            <ShieldAlert size={12} />
+                            <span>¡Extraviado!</span>
+                          </>
+                        ) : (
+                          <>
+                            <ShieldCheck size={12} />
+                            <span>A Salvo</span>
+                          </>
+                        )}
+                      </button>
+                    ) : (
+                      <div
+                        className={`status-toggle-btn ${pet.status === 'lost' ? 'lost' : 'safe'}`}
+                        style={{ cursor: 'default', opacity: 0.9 }}
+                        title="Estado de alerta (Solo modificable por el dueño de la mascota)"
+                      >
+                        {pet.status === 'lost' ? (
+                          <>
+                            <ShieldAlert size={12} />
+                            <span>¡Extraviado!</span>
+                          </>
+                        ) : (
+                          <>
+                            <ShieldCheck size={12} />
+                            <span>A Salvo</span>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div className="pet-meta-text">
@@ -350,14 +375,16 @@ export default function DashboardView({
                   <span className="btn-label">Ver Perfil</span>
                 </button>
 
-                <button
-                  onClick={() => onEditPet(pet)}
-                  className="action-btn edit-btn"
-                  title="Editar información"
-                >
-                  <Edit3 size={15} />
-                  <span className="btn-label">Editar</span>
-                </button>
+                {canManage && (
+                  <button
+                    onClick={() => onEditPet(pet)}
+                    className="action-btn edit-btn"
+                    title="Editar información (Solo dueño/admin)"
+                  >
+                    <Edit3 size={15} />
+                    <span className="btn-label">Editar</span>
+                  </button>
+                )}
               </div>
             </div>
           );

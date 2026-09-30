@@ -1,0 +1,77 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Función auxiliar: verifica si el usuario ha iniciado sesión
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Función auxiliar: verifica si el usuario autenticado es dueño del documento
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Función auxiliar: verifica si el usuario tiene rol de Administrador
+    function isAdmin() {
+      return isSignedIn() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        request.auth.token.email.matches('.*admin.*') ||
+        request.auth.token.email == 'lealjesusalberto@gmail.com'
+      );
+    }
+
+    // =========================================================================
+    // COLECCIÓN 'pets' (Mascotas y Placas Inteligentes QR)
+    // =========================================================================
+    match /pets/{petId} {
+      // 1. LECTURA PÚBLICA:
+      // Cualquier persona que escanee la medalla QR en la calle debe poder ver
+      // la ficha pública y teléfonos de emergencia para devolver la mascota.
+      allow read: if true;
+
+      // 2. CREACIÓN PROTEGIDA:
+      // Obliga a que el usuario esté autenticado y que el 'ownerId' coincida con su UID
+      allow create: if isSignedIn() && (
+        request.resource.data.ownerId == request.auth.uid || isAdmin()
+      );
+
+      // 3. MODIFICACIÓN Y EDICIÓN PROTEGIDA (Evita hackeos por consola):
+      // SOLO el dueño legítimo de la mascota (comprobado por request.auth.uid)
+      // o un Administrador del sistema pueden alterar o actualizar los datos.
+      // Quien intente updateDoc() desde DevTools recibirá 'permission-denied'.
+      allow update: if isSignedIn() && (
+        resource.data.ownerId == request.auth.uid ||
+        request.auth.token.email == resource.data.ownerEmail ||
+        request.auth.token.email == resource.data.owner.email ||
+        isAdmin()
+      );
+
+      // 4. ELIMINACIÓN PROTEGIDA:
+      // Solo el dueño o el admin pueden borrar la placa.
+      allow delete: if isSignedIn() && (
+        resource.data.ownerId == request.auth.uid ||
+        request.auth.token.email == resource.data.ownerEmail ||
+        request.auth.token.email == resource.data.owner.email ||
+        isAdmin()
+      );
+    }
+
+    // =========================================================================
+    // COLECCIÓN 'users' (Perfiles de Usuarios Registrados en Firebase)
+    // =========================================================================
+    match /users/{userId} {
+      // Un usuario solo puede leer su propio perfil individual
+      allow get: if isOwner(userId) || isAdmin();
+
+      // Solo el Administrador puede listar la colección completa para el panel
+      allow list: if isAdmin();
+
+      // Cada usuario puede registrar o actualizar su propio perfil
+      allow create, update: if isOwner(userId) || isAdmin();
+
+      // Solo administradores pueden eliminar usuarios
+      allow delete: if isAdmin();
+    }
+  }
+}

@@ -6,7 +6,8 @@ import {
   onAuthStateChanged,
   updateProfile
 } from "firebase/auth";
-import { auth, googleProvider } from "./config";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { auth, googleProvider, db } from "./config";
 
 /**
  * Translate common Firebase Auth errors into friendly Spanish messages
@@ -35,10 +36,66 @@ export function getAuthErrorMessage(errorCode) {
 }
 
 /**
+ * Check if a user is an administrator
+ */
+export function isUserAdmin(user) {
+  if (!user) return false;
+  return (
+    user.role === 'admin' ||
+    user.email?.toLowerCase().includes('admin') ||
+    user.email?.toLowerCase() === 'lealjesusalberto@gmail.com'
+  );
+}
+
+/**
+ * Sync user profile to 'users' collection in Firestore with roles
+ */
+export async function syncUserToFirestore(authUser) {
+  if (!authUser) return null;
+  try {
+    const userRef = doc(db, "users", authUser.uid);
+    const snap = await getDoc(userRef);
+
+    const isAdmin =
+      authUser.email?.toLowerCase().includes("admin") ||
+      authUser.email?.toLowerCase() === "admin@qpet.com" ||
+      authUser.email?.toLowerCase() === "lealjesusalberto@gmail.com" ||
+      snap.data()?.role === "admin";
+
+    const userData = {
+      uid: authUser.uid,
+      email: authUser.email || "",
+      displayName: authUser.displayName || authUser.email?.split("@")[0] || "Usuario",
+      photoURL: authUser.photoURL || null,
+      role: snap.exists() ? (snap.data().role || (isAdmin ? "admin" : "user")) : (isAdmin ? "admin" : "user"),
+      lastLogin: new Date().toISOString()
+    };
+
+    if (!snap.exists()) {
+      userData.createdAt = new Date().toISOString();
+    }
+
+    await setDoc(userRef, userData, { merge: true });
+    return userData;
+  } catch (err) {
+    console.warn("Could not sync user to Firestore users collection:", err);
+    return {
+      uid: authUser.uid,
+      email: authUser.email,
+      role: isUserAdmin(authUser) ? "admin" : "user"
+    };
+  }
+}
+
+/**
  * Log in with email & password
  */
 export async function loginWithEmail(email, password) {
-  return await signInWithEmailAndPassword(auth, email, password);
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  if (userCredential.user) {
+    await syncUserToFirestore(userCredential.user);
+  }
+  return userCredential;
 }
 
 /**
@@ -49,6 +106,9 @@ export async function registerWithEmail(email, password, displayName) {
   if (displayName && userCredential.user) {
     await updateProfile(userCredential.user, { displayName });
   }
+  if (userCredential.user) {
+    await syncUserToFirestore(userCredential.user);
+  }
   return userCredential;
 }
 
@@ -56,7 +116,11 @@ export async function registerWithEmail(email, password, displayName) {
  * Sign in with Google Popup
  */
 export async function loginWithGoogle() {
-  return await signInWithPopup(auth, googleProvider);
+  const userCredential = await signInWithPopup(auth, googleProvider);
+  if (userCredential.user) {
+    await syncUserToFirestore(userCredential.user);
+  }
+  return userCredential;
 }
 
 /**
@@ -67,8 +131,16 @@ export async function logout() {
 }
 
 /**
- * Subscribe to auth state changes
+ * Subscribe to auth state changes and enrich with role
  */
 export function subscribeToAuth(callback) {
-  return onAuthStateChanged(auth, callback);
+  return onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const profile = await syncUserToFirestore(user);
+      user.role = profile?.role || (isUserAdmin(user) ? "admin" : "user");
+      callback(user);
+    } else {
+      callback(null);
+    }
+  });
 }

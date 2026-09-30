@@ -148,3 +148,38 @@ export async function seedInitialPets() {
 
   await Promise.all(promises);
 }
+
+/**
+ * Fetch all registered users from Firestore 'users' collection (Admin only)
+ */
+export async function fetchUsersList() {
+  try {
+    const usersRef = collection(db, "users");
+    const snapshot = await getDocs(usersRef);
+    const users = [];
+    snapshot.forEach((d) => {
+      users.push({ id: d.id, ...d.data() });
+    });
+    return users;
+  } catch (err) {
+    console.warn("Could not fetch users list:", err);
+    return [];
+  }
+}
+
+/**
+ * Update user role (e.g. promote to 'admin' or set to 'user')
+ */
+export async function updateUserRole(userId, newRole) {
+  const userRef = doc(db, "users", userId);
+  await updateDoc(userRef, { role: newRole });
+}
+
+/**
+ * Delete a pet from Firestore
+ */
+export async function deletePetFromFirestore(petId) {
+  const petRef = doc(db, COLLECTION_NAME, petId);
+  await deleteDoc(petRef);
+}
+

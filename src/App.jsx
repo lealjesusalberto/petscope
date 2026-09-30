@@ -3,12 +3,13 @@ import Navbar from './components/Navbar';
 import OnboardingView from './components/OnboardingView';
 import DashboardView from './components/DashboardView';
 import PetProfileView from './components/PetProfileView';
+import AdminView from './components/AdminView';
 import QrModal from './components/QrModal';
 import PetFormModal from './components/PetFormModal';
 import CameraScannerModal from './components/CameraScannerModal';
 import AuthModal from './components/AuthModal';
 import { loadPets, savePets, INITIAL_PETS } from './data/petsData';
-import { subscribeToAuth, logout } from './firebase/authService';
+import { subscribeToAuth, logout, isUserAdmin } from './firebase/authService';
 import {
   subscribeToPets,
   savePetToFirestore,
@@ -16,7 +17,7 @@ import {
   fetchPetById,
   seedInitialPets
 } from './firebase/petService';
-import { Home, Sparkles, QrCode, PlusCircle, Cloud, CloudCheck } from 'lucide-react';
+import { Home, Sparkles, QrCode, PlusCircle, Cloud, CloudCheck, ShieldCheck } from 'lucide-react';
 
 export default function App() {
   const [pets, setPets] = useState(loadPets);
@@ -125,6 +126,19 @@ export default function App() {
     const targetPet = pets.find((p) => p.id === petId);
     if (!targetPet) return;
 
+    // Check ownership or admin privileges
+    const isOwner = currentUser && (
+      (targetPet.ownerId && targetPet.ownerId === currentUser.uid) ||
+      (targetPet.ownerEmail && currentUser.email && targetPet.ownerEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
+      (targetPet.owner?.email && currentUser.email && targetPet.owner.email.toLowerCase() === currentUser.email.toLowerCase())
+    );
+    const isAdmin = isUserAdmin(currentUser);
+
+    if (!isOwner && !isAdmin) {
+      showToast('Permiso denegado: Solo el dueño de la mascota o el administrador pueden alterar su estado.');
+      return;
+    }
+
     const nextStatus = targetPet.status === 'lost' ? 'safe' : 'lost';
 
     const updated = pets.map((p) => {
@@ -156,6 +170,21 @@ export default function App() {
   // Save pet (add or update in Local + Firestore)
   const handleSavePet = async (savedPet) => {
     const exists = pets.some((p) => p.id === savedPet.id);
+    if (exists) {
+      const existingPet = pets.find((p) => p.id === savedPet.id);
+      const isOwner = currentUser && (
+        (existingPet.ownerId && existingPet.ownerId === currentUser.uid) ||
+        (existingPet.ownerEmail && currentUser.email && existingPet.ownerEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
+        (existingPet.owner?.email && currentUser.email && existingPet.owner.email.toLowerCase() === currentUser.email.toLowerCase())
+      );
+      const isAdmin = isUserAdmin(currentUser);
+
+      if (!isOwner && !isAdmin) {
+        showToast('Permiso denegado: Solo el dueño legítimo o el administrador pueden modificar esta mascota.');
+        return;
+      }
+    }
+
     let updated;
     if (exists) {
       updated = pets.map((p) => (p.id === savedPet.id ? savedPet : p));
@@ -295,6 +324,19 @@ export default function App() {
             onOpenQr={(pet) => setQrModalPet(pet)}
           />
         )}
+
+        {currentView === 'admin' && (
+          <AdminView
+            pets={pets}
+            currentUser={currentUser}
+            onSelectPet={(pet) => {
+              setSelectedPet(pet);
+              setCurrentView('profile');
+            }}
+            onOpenQr={(pet) => setQrModalPet(pet)}
+            onBack={() => setCurrentView('dashboard')}
+          />
+        )}
       </main>
 
       {/* Bottom Fixed Navigation Bar (Always Visible) */}
@@ -322,6 +364,17 @@ export default function App() {
           <QrCode size={20} />
           <span>Escanear</span>
         </button>
+
+        {isUserAdmin(currentUser) && (
+          <button
+            className={`bottom-nav-item ${currentView === 'admin' ? 'active' : ''}`}
+            onClick={() => setCurrentView('admin')}
+            style={{ color: currentView === 'admin' ? '#D97706' : '#78716C' }}
+          >
+            <ShieldCheck size={20} />
+            <span>Admin</span>
+          </button>
+        )}
 
         <button
           className="bottom-nav-item"

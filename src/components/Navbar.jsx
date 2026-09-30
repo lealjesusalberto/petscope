@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { QrCode, Plus, Sparkles, Home, User, LogOut, CheckCircle } from 'lucide-react';
+import { QrCode, Plus, Sparkles, Home, User, LogOut, CheckCircle, ShieldCheck } from 'lucide-react';
+import { isUserAdmin } from '../firebase/authService';
 
 export default function Navbar({
   currentView,
@@ -11,6 +12,7 @@ export default function Navbar({
   onLogout
 }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const isAdmin = isUserAdmin(currentUser);
 
   return (
     <header className="app-header">
@@ -50,6 +52,22 @@ export default function Navbar({
           >
             Mis Mascotas
           </button>
+
+          {isAdmin && (
+            <button
+              className={`nav-link-btn ${currentView === 'admin' ? 'active' : ''}`}
+              onClick={() => onNavigate('admin')}
+              style={{
+                color: currentView === 'admin' ? '#B45309' : '#D97706',
+                fontWeight: 800,
+                background: currentView === 'admin' ? '#FEF3C7' : 'transparent',
+                borderRadius: '12px'
+              }}
+            >
+              <ShieldCheck size={16} />
+              <span>Panel Admin</span>
+            </button>
+          )}
 
           <button
             className="nav-link-btn"
@@ -132,6 +150,33 @@ export default function Navbar({
                     <CheckCircle size={13} />
                     <span>Conectado a Firebase</span>
                   </div>
+
+                  {isAdmin && (
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        onNavigate('admin');
+                      }}
+                      style={{
+                        width: '100%',
+                        background: '#FEF3C7',
+                        color: '#92400E',
+                        border: '1px solid #FDE68A',
+                        borderRadius: '10px',
+                        padding: '8px 10px',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        cursor: 'pointer',
+                        marginBottom: '8px'
+                      }}
+                    >
+                      <ShieldCheck size={14} color="#D97706" />
+                      <span>Panel Administrador</span>
+                    </button>
+                  )}
 
                   <button
                     onClick={() => {
