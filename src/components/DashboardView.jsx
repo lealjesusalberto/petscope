@@ -69,7 +69,7 @@ export default function DashboardView({
             <div className="greeting-sub">
               {currentUser ? `Cuenta: ${currentUser.displayName || currentUser.email}` : 'Panel de Control'}
             </div>
-            <h1 className="greeting-title">Mis Mascotas Registradas</h1>
+            <h1 className="greeting-title">Mascotas Registradas</h1>
           </div>
         </div>
 

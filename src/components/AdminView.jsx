@@ -80,7 +80,7 @@ export default function AdminView({ pets, currentUser, onSelectPet, onOpenQr, on
             cursor: 'pointer'
           }}
         >
-          Volver a Mis Mascotas
+          Volver a Mascotas Registradas
         </button>
       </div>
     );

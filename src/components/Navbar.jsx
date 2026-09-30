@@ -50,7 +50,15 @@ export default function Navbar({
             className={`nav-link-btn ${currentView === 'dashboard' ? 'active' : ''}`}
             onClick={() => onNavigate('dashboard')}
           >
-            Mis Mascotas
+            Mascotas Registradas
+          </button>
+
+          <button
+            className={`nav-link-btn ${currentView === 'user-profile' ? 'active' : ''}`}
+            onClick={() => onNavigate('user-profile')}
+          >
+            <User size={15} />
+            <span>Mi Perfil</span>
           </button>
 
           {isAdmin && (
@@ -188,6 +196,32 @@ export default function Navbar({
                       <span>Copiar</span>
                     </button>
                   </div>
+
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      onNavigate('user-profile');
+                    }}
+                    style={{
+                      width: '100%',
+                      background: '#FFF8EB',
+                      color: '#B45309',
+                      border: '1px solid #FDE68A',
+                      borderRadius: '10px',
+                      padding: '8px 10px',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      cursor: 'pointer',
+                      marginBottom: '8px',
+                      transition: 'background 0.15s ease'
+                    }}
+                  >
+                    <User size={14} color="#D97706" />
+                    <span>Mi Perfil & Mascotas</span>
+                  </button>
 
                   {isAdmin && (
                     <button

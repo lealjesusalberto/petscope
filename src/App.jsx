@@ -4,6 +4,7 @@ import OnboardingView from './components/OnboardingView';
 import DashboardView from './components/DashboardView';
 import PetProfileView from './components/PetProfileView';
 import AdminView from './components/AdminView';
+import UserProfileView from './components/UserProfileView';
 import QrModal from './components/QrModal';
 import PetFormModal from './components/PetFormModal';
 import CameraScannerModal from './components/CameraScannerModal';
@@ -17,7 +18,7 @@ import {
   fetchPetById,
   seedInitialPets
 } from './firebase/petService';
-import { Home, Sparkles, QrCode, PlusCircle, Cloud, CloudCheck, ShieldCheck } from 'lucide-react';
+import { Home, Sparkles, QrCode, PlusCircle, Plus, Cloud, CloudCheck, ShieldCheck, User } from 'lucide-react';
 
 export default function App() {
   const [pets, setPets] = useState(loadPets);
@@ -358,53 +359,90 @@ export default function App() {
             onBack={() => setCurrentView('dashboard')}
           />
         )}
+
+        {currentView === 'user-profile' && (
+          <UserProfileView
+            currentUser={currentUser}
+            pets={pets}
+            onSelectPet={(pet) => {
+              setSelectedPet(pet);
+              setCurrentView('profile');
+            }}
+            onOpenQr={(pet) => setQrModalPet(pet)}
+            onAddNewPet={handleStartAddNewPet}
+            onEditPet={(pet) => setEditingPet(pet)}
+            onOpenAuth={() => setIsAuthModalOpen(true)}
+            onLogout={handleLogout}
+            onNavigate={handleNavigate}
+            onToggleStatus={handleToggleStatus}
+          />
+        )}
       </main>
 
-      {/* Bottom Fixed Navigation Bar (Always Visible) */}
-      <nav className="bottom-nav">
-        <button
-          className={`bottom-nav-item ${currentView === 'onboarding' ? 'active' : ''}`}
-          onClick={() => setCurrentView('onboarding')}
-        >
-          <Sparkles size={20} />
-          <span>Inicio</span>
-        </button>
-
-        <button
-          className={`bottom-nav-item ${currentView === 'dashboard' ? 'active' : ''}`}
-          onClick={() => setCurrentView('dashboard')}
-        >
-          <Home size={20} />
-          <span>Mis Placas</span>
-        </button>
-
-        <button
-          className="bottom-nav-item"
-          onClick={() => setIsScannerOpen(true)}
-        >
-          <QrCode size={20} />
-          <span>Escanear</span>
-        </button>
-
-        {isUserAdmin(currentUser) && (
+      {/* Bottom Fixed Navigation Bar (Always Visible - Luxury Dock Design) */}
+      <nav className="bottom-nav" aria-label="Navegación principal">
+        <div className="bottom-nav-inner">
           <button
-            className={`bottom-nav-item ${currentView === 'admin' ? 'active' : ''}`}
-            onClick={() => setCurrentView('admin')}
-            style={{ color: currentView === 'admin' ? '#D97706' : '#78716C' }}
+            className={`bottom-nav-item ${currentView === 'onboarding' ? 'active' : ''}`}
+            onClick={() => handleNavigate('onboarding')}
+            title="Inicio"
           >
-            <ShieldCheck size={20} />
-            <span>Admin</span>
+            <div className="bottom-nav-icon-wrap">
+              <Sparkles size={20} />
+            </div>
+            <span>Inicio</span>
           </button>
-        )}
 
-        <button
-          className="bottom-nav-item"
-          onClick={handleStartAddNewPet}
-          style={{ color: '#F57C00' }}
-        >
-          <PlusCircle size={20} />
-          <span>Crear Placa</span>
-        </button>
+          <button
+            className={`bottom-nav-item ${currentView === 'dashboard' ? 'active' : ''}`}
+            onClick={() => handleNavigate('dashboard')}
+            title="Mascotas Registradas"
+          >
+            <div className="bottom-nav-icon-wrap">
+              <Home size={20} />
+            </div>
+            <span className="bottom-nav-label-desktop">Mascotas Registradas</span>
+            <span className="bottom-nav-label-mobile">Mascotas</span>
+          </button>
+
+          {/* Elevated Center CTA Button: Crear Placa */}
+          <button
+            className="bottom-nav-cta-center"
+            onClick={handleStartAddNewPet}
+            title="Crear Nueva Placa QR Inteligente"
+            aria-label="Crear Placa"
+          >
+            <div className="bottom-nav-cta-halo"></div>
+            <div className="bottom-nav-cta-circle">
+              <Plus size={22} strokeWidth={2.8} />
+            </div>
+            <span className="bottom-nav-cta-text">Crear Placa</span>
+          </button>
+
+          <button
+            className={`bottom-nav-item ${currentView === 'user-profile' ? 'active' : ''}`}
+            onClick={() => handleNavigate('user-profile')}
+            title="Mi Perfil y Mascotas"
+          >
+            <div className="bottom-nav-icon-wrap">
+              <User size={20} />
+            </div>
+            <span>Mi Perfil</span>
+          </button>
+
+          {isUserAdmin(currentUser) && (
+            <button
+              className={`bottom-nav-item ${currentView === 'admin' ? 'active' : ''}`}
+              onClick={() => handleNavigate('admin')}
+              title="Panel Administrador"
+            >
+              <div className="bottom-nav-icon-wrap">
+                <ShieldCheck size={20} />
+              </div>
+              <span>Admin</span>
+            </button>
+          )}
+        </div>
       </nav>
 
       {/* Modals */}
